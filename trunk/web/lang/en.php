@@ -1,5 +1,5 @@
 <?php
-	//oj-header.php
+	//header.php
 	$MSG_FAQ="F.A.Qs";
 	$MSG_BBS="Web Board";
 	$MSG_HOME="Home";
@@ -149,6 +149,7 @@
 	$MSG_TESTDATA="TestData";
 	
 	//admin menu
+    $MSG_VIEW_DISABLED_USER="View disabled or pending review users";
 	$MSG_SEEOJ="SeeOJ";
 	$MSG_ADD="Add";
 	$MSG_LIST="List";
@@ -471,7 +472,7 @@
        $MSG_FORBIDDEN="forbidden ";
        $MSG_OTHERS="Other's ";
        $MSG_SUBNET="Subnet ";
-       $MSG_ONLY_LAST_SUBMISSION="Only the last submission will be scored
+       $MSG_ONLY_LAST_SUBMISSION="Only the last submission will be scored";
 	   $MSG_AI_HELP="AI Help";
        $MSG_SHOW_DIFF="Show Differ Output";
        $MSG_UPSOLVING="Upsolving";
