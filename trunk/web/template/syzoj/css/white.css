@@ -23,13 +23,13 @@
 }
 .panel-default{
    padding: 5px;
-   background-image: url(../../image/background.jpg);
+   background-color: #fff;
    border: 1px solid #eee;
    margin-top:50px;
 }
 .container .jumbotron{
    padding: 5px;
-   background-image: url(../../image/background.jpg);
+   background-color: #fff;
    border: 1px solid #eee;
    margin-top:50px;
 }

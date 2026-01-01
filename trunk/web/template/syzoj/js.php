@@ -39,7 +39,9 @@ $(document).ready(function(){
   if(screen_width < 800) $("#main").attr("class","");
   if(screen_width < 800) $("#MainBg-C").attr("class","");
 
-<?php if(isset($OJ_BG)&&$OJ_BG!="") echo " $('body').css('background','url($OJ_BG)').css('background-repeat','no-repeat').css('background-size','100%'); " ?>
+<?php // 禁用背景图片，使用纯白背景
+// if(isset($OJ_BG)&&$OJ_BG!="") echo " $('body').css('background','url($OJ_BG)').css('background-repeat','no-repeat').css('background-size','100%'); "
+?>
   if(window.location.href.indexOf("rank")==-1){
 	  $("tr").mouseover(function(){$(this).addClass("active")});
 	  $("tr").mouseout(function(){$(this).removeClass("active")})

@@ -73,6 +73,7 @@ if(isset($_GET['keyword']) && $_GET['keyword']!=""){
       <th><?php echo $MSG_ADMIN ?></th>
       <th><?php echo $MSG_SETPASSWORD?></th>
       <th><?php echo $MSG_PRIVILEGE."-".$MSG_ADD ?></th>
+      <th><?php echo $MSG_EDIT ?></th>
       </tr>
 </thead>
 
@@ -112,6 +113,7 @@ if(isset($_GET['keyword']) && $_GET['keyword']!=""){
       }
         echo "<td><a class='label label-warning' href=changepass.php?uid=".$row['user_id']."&getkey=".$_SESSION[$OJ_NAME.'_'.'getkey'].">".$MSG_RESET."</a></td>";
         echo "<td><a class='label label-success' href=privilege_add.php?uid=".$row['user_id']."&getkey=".$_SESSION[$OJ_NAME.'_'.'getkey'].">".$MSG_ADD."</a></td>";
+        echo "<td><a class='label label-info' href=user_edit.php?uid=".htmlentities(urlencode($row['user_id'])).">".$MSG_EDIT."</a></td>";
       echo "</tr>";
     } ?>
   </table>

@@ -14,6 +14,19 @@
   <meta http-equiv="Content-Language" content="zh-cn">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Problem Add</title>
+  <style>
+    /* 防止预览模式下溢出 */
+    body {
+      overflow-x: hidden;
+    }
+    #main {
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    .ke-container {
+      max-width: 100% !important;
+    }
+  </style>
 </head>	  
 	  <?php
   echo "<center><h3>".$MSG_PROBLEM."-".$MSG_ADD."</h3></center>";

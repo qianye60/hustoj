@@ -29,6 +29,10 @@
                     <input name="school" placeholder="" type="text" value="">
                 </div>
                 <div class="field">
+                    <label for="group_name"><?php echo $MSG_GROUP_NAME?></label>
+                    <input name="group_name" placeholder="班级/分组" type="text" value="">
+                </div>
+                <div class="field">
                     <label for="email"><?php echo $MSG_EMAIL?>*</label>
                     <input name="email" placeholder="用QQ邮箱可得QQ头像" type="text">
                 </div>

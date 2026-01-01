@@ -75,7 +75,7 @@
 ?>
 
 <!DOCTYPE html>
-<html lang="cn" style="position:fixed; width: 100%; overflow: hidden; ">
+<html lang="cn" style="position:fixed; width: 100%; overflow: hidden; background: #fff;">
 
 <head>
     <meta charset="utf-8">
@@ -196,15 +196,15 @@
         if(!isset($_GET['spa'])){
 ?>
    
-<body id="MainBg-C" style="position: relative; margin-top: 49px; height: calc(100% - 49px); overflow-y: overlay;">
+<body id="MainBg-C" style="position: relative; margin-top: 49px; height: calc(100% - 49px); overflow-y: overlay; background: #fff !important;">
     <div id="page-header" class="ui fixed borderless menu" style="position: fixed; height: 49px; z-index:99999">
         <div id="menu" class="ui stackable mobile ui container computer" style="margin-left:auto;margin-right:auto;">
-            <a class="header item"  href="/"><span
+            <a class="header item"  href="welcome.php"><span
                     style="font-family: 'Exo 2'; font-size: 1.5em; font-weight: 600; "><?php echo $domain==$DOMAIN?$OJ_NAME:ucwords($OJ_NAME)."'s OJ"?></span></a>
-            
+
           <?php
             if(isset($OJ_AI_HTML)&&$OJ_AI_HTML && !isset($OJ_ON_SITE_CONTEST_ID) ) echo $OJ_AI_HTML;
-            else echo '<a class="desktop-only item" href="/"><i class="home icon"></i><span class="desktop-only">'.$MSG_HOME.'</span></a>';
+            else echo '<a class="desktop-only item" href="home.php"><i class="home icon"></i><span class="desktop-only">'.$MSG_HOME.'</span></a>';
             if(file_exists("moodle")){  // 如果存在moodle目录，自动添加链接
               echo '<a class="item" href="moodle"><i class="group icon"></i><span class="desktop-only">Moodle</span></a>';
             }
@@ -231,6 +231,9 @@
             <!-- 排名 -->
             <a class="item <?php if ($url=="ranklist.php") echo "active";?> "
                 href="<?php echo $path_fix?>ranklist.php"><i class="signal icon"></i><span class="desktop-only"><?php echo $MSG_RANKLIST?></span></a>
+            <a class="item" href="https://www.hello-algo.com/chapter_hello_algo/" target="_blank" rel="noopener">
+                <i class="book icon"></i><span class="desktop-only">算法自学</span>
+            </a>
             <!--<a class="item <?php //if ($url=="contest.php") echo "active";?>" href="/discussion/global"><i class="comments icon"></i><span class="desktop-only"><?php echo $MSG_BBS?></span></a>-->
             <!-- 近期比赛 -->    
 <?php if(isset($OJ_RECENT_CONTEST)&&$OJ_RECENT_CONTEST){    ?>

@@ -1,211 +1,258 @@
-<?php require_once("admin-header.php");
-  if(isset($OJ_LANG)){
+<?php
+require_once("admin-header.php");
+if(isset($OJ_LANG)){
     require_once("../lang/$OJ_LANG.php");
-  }
-$sql="select avg(usedtime) delay from (select judgetime-in_date usedtime from solution where result >=4  order by solution_id desc limit 10 ) c";
-$delay=pdo_query($sql);
+}
 
+// 获取统计数据
+$problem_count = pdo_query("SELECT COUNT(*) FROM problem")[0][0] ?? 0;
+$user_count = pdo_query("SELECT COUNT(*) FROM users")[0][0] ?? 0;
+$solution_count = pdo_query("SELECT COUNT(*) FROM solution")[0][0] ?? 0;
+$contest_count = pdo_query("SELECT COUNT(*) FROM contest")[0][0] ?? 0;
+$today_submit = pdo_query("SELECT COUNT(*) FROM solution WHERE DATE(in_date) = CURDATE()")[0][0] ?? 0;
+$today_ac = pdo_query("SELECT COUNT(*) FROM solution WHERE DATE(in_date) = CURDATE() AND result = 4")[0][0] ?? 0;
+
+$delay_result = pdo_query("SELECT AVG(judgetime-in_date) as delay FROM (SELECT judgetime, in_date FROM solution WHERE result >= 4 ORDER BY solution_id DESC LIMIT 10) c");
+$delay = $delay_result[0]['delay'] ?? 0;
+
+$recent_solutions = pdo_query("SELECT s.solution_id, s.user_id, s.problem_id, s.result, s.in_date FROM solution s ORDER BY solution_id DESC LIMIT 8");
+
+$result_map = array(
+    4 => ['text' => 'AC', 'color' => '#27ae60'],
+    5 => ['text' => 'PE', 'color' => '#f39c12'],
+    6 => ['text' => 'WA', 'color' => '#e74c3c'],
+    7 => ['text' => 'TLE', 'color' => '#e74c3c'],
+    8 => ['text' => 'MLE', 'color' => '#e74c3c'],
+    9 => ['text' => 'OLE', 'color' => '#e74c3c'],
+    10 => ['text' => 'RE', 'color' => '#e74c3c'],
+    11 => ['text' => 'CE', 'color' => '#f39c12'],
+);
 ?>
-<html>
-<head>
-  <title><?php echo $MSG_ADMIN?></title>
-</head>
 
-<body>
+<style>
+.dashboard {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
 
+.welcome {
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.welcome h2 { color: #fff; margin: 0 0 5px 0; font-size: 22px; }
+.welcome p { margin: 0; opacity: 0.9; font-size: 13px; }
 
-<table class="table">
-  <tbody>
-    <tr>
-<td>
-    <center>
-        <a class='btn btn-info btn-sm' href='#' onclick='toggleWatch()'>System Status</a>
-    </center>
-</td>
-<td id="watch" style="display:none;">
-    <iframe src="watch.php?notext" width="100%" height="200"></iframe>
-     Delay:<?php echo $delay[0][0] ?>s/judge &nbsp;&nbsp;  
-		    CPU:<?php echo sys_getloadavg()[0];?>tasks/1min  &nbsp;&nbsp; 
-	<?php if(function_exists('system')){  ?>
-		    FreeMem:<?php system(" free -h|grep Mem|awk '{print $7\"/\"$2 }'");?>&nbsp;&nbsp;  
-		    FreeDisk:<?php system("df -h|grep '/dev/'|grep -v 'shm'|awk '{print $4 \"/\" $2}'");?>&nbsp;&nbsp;  
-	<?php } ?>
-</td>
-<td>
-    <div id="serverInfo" style="display:block;">
-       Delay:<?php echo $delay[0][0] ?>s/judge &nbsp;&nbsp;  
-		    CPU:<?php echo sys_getloadavg()[0];?>tasks/1min  &nbsp;&nbsp; 
-	<?php if(function_exists('system')){  ?>
-		    FreeMem:<?php system(" free -h|grep Mem|awk '{print $7\"/\"$2 }'");?>&nbsp;&nbsp;  
-		    FreeDisk:<?php system("df -h|grep '/dev/'|grep -v 'shm'|awk '{print $4 \"/\" $2}'");?>&nbsp;&nbsp;  
-	<?php } ?>
-	            <?php echo $MSG_PROBLEM. pdo_query("select count(*) from problem ")[0][0];?>&nbsp;&nbsp;
-                    <?php echo $MSG_USER. pdo_query("select count(*) from users ")[0][0];?>&nbsp;&nbsp;
-                    <?php echo $MSG_SUBMIT. pdo_query("select count(*) from solution ")[0][0];?>&nbsp;&nbsp;
- 
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+@media (max-width: 800px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+.stat-card .num {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+.stat-card .label {
+    font-size: 13px;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+.stat-card .sub {
+    font-size: 12px;
+    color: #27ae60;
+    margin-top: 5px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+@media (max-width: 800px) {
+    .grid { grid-template-columns: 1fr; }
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+.card-title {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    font-weight: 600;
+    font-size: 15px;
+}
+.card-body {
+    padding: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.info-item {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+}
+.info-item .label { font-size: 12px; color: #7f8c8d; }
+.info-item .value { font-size: 16px; font-weight: 600; color: #2c3e50; margin-top: 3px; }
+
+.quick-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.quick-btn {
+    display: block;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #333;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+}
+.quick-btn:hover {
+    background: #ecf0f1;
+    text-decoration: none;
+}
+
+.recent-table {
+    width: 100%;
+    font-size: 13px;
+}
+.recent-table th {
+    text-align: left;
+    padding: 10px;
+    background: #f8f9fa;
+    font-weight: 500;
+    border-bottom: 1px solid #ddd;
+}
+.recent-table td {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: #fff;
+}
+</style>
+
+<div class="dashboard">
+    <div class="welcome">
+        <h2>👋 欢迎，<?php echo isset($_SESSION[$OJ_NAME.'_'.'user_id']) ? htmlspecialchars($_SESSION[$OJ_NAME.'_'.'user_id']) : 'Admin'; ?></h2>
+        <p><?php echo $OJ_NAME; ?> 管理后台 · <?php echo date('Y-m-d H:i'); ?></p>
     </div>
-</td>
-<script>
-    function toggleWatch() {
-        var watch = document.getElementById("watch");
-        var serverInfo = document.getElementById("serverInfo");
-        if (watch.style.display === "none") {
-            watch.style.display = "block";
-            serverInfo.style.display = "none";
-        } else {
-            watch.style.display = "none";
-            serverInfo.style.display = "block";
-        }
-    }
-</script>
 
-        
-     
-          
+    <div class="stats">
+        <div class="stat-card">
+            <div class="num"><?php echo number_format($problem_count); ?></div>
+            <div class="label">📝 题目</div>
+        </div>
+        <div class="stat-card">
+            <div class="num"><?php echo number_format($user_count); ?></div>
+            <div class="label">👥 用户</div>
+        </div>
+        <div class="stat-card">
+            <div class="num"><?php echo number_format($solution_count); ?></div>
+            <div class="label">📊 提交</div>
+            <div class="sub">今日 +<?php echo $today_submit; ?></div>
+        </div>
+        <div class="stat-card">
+            <div class="num"><?php echo number_format($contest_count); ?></div>
+            <div class="label">🏆 比赛</div>
+        </div>
+    </div>
 
-			
-    </tr>
-    <tr>
-      <td><a class='btn btn-block btn-sm' href="../status.php" target="_top"><b><?php echo $MSG_SEEOJ?></b></a></td>
-      <td><p><?php echo $MSG_HELP_SEEOJ?></p></td>
-    </tr>
- <tr>
-      <td><a class='btn btn-block btn-sm' href="langmask.html" target="_top"><b>Langmask Calculator </b></a></td>
-      <td><p>计算语言掩码Langmask</p></td>
-    </tr>
+    <div class="grid">
+        <div class="card">
+            <div class="card-title">📈 系统状态</div>
+            <div class="card-body">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">判题延迟</div>
+                        <div class="value"><?php echo round($delay, 2); ?>s</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">今日AC</div>
+                        <div class="value"><?php echo $today_ac; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">PHP版本</div>
+                        <div class="value"><?php echo phpversion(); ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">数据库</div>
+                        <div class="value">MySQL</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])){?>
-    <tr>
-      <td><center><a class='btn btn-info btn-sm' href="setmsg.php" target="main"><b><?php echo $MSG_NEWS."-".$MSG_SETMESSAGE?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_SETMESSAGE?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-info btn-sm' href="news_list.php" target="main"><b><?php echo $MSG_NEWS."-".$MSG_LIST?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_NEWS_LIST?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-info btn-sm' href="news_add_page.php" target="main"><b><?php echo $MSG_NEWS."-".$MSG_ADD?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_ADD_NEWS?></p></td>
-    </tr>
-  <?php }?>
+        <div class="card">
+            <div class="card-title">⚡ 快捷操作</div>
+            <div class="card-body">
+                <div class="quick-btns">
+                    <a href="problem_add_page.php" class="quick-btn">➕ 添加题目</a>
+                    <a href="contest_add.php" class="quick-btn">🏆 创建比赛</a>
+                    <a href="user_add.php" class="quick-btn">👤 添加用户</a>
+                    <a href="news_add_page.php" class="quick-btn">📢 发布公告</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])||isset( $_SESSION[$OJ_NAME.'_'.'password_setter'] )){?>
-    <tr>
-      <td><center><a class='btn btn-primary btn-sm' href="user_list.php" target="main"><b><?php echo $MSG_USER."-".$MSG_LIST?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_USER_LIST?></p></td>
-    </tr>
-  <?php }?>
-  <?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])){?>
-    <tr>
-      <td><center><a class='btn btn-primary btn-sm' href="user_add.php" target="main"><b><?php echo $MSG_USER."-".$MSG_ADD?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_USER_ADD?></p></td>
-    </tr>
-  <?php }?>
-  <?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])||isset( $_SESSION[$OJ_NAME.'_'.'password_setter'] )){?>
-    <tr>
-      <td><center><a class='btn btn-primary btn-sm' href="changepass.php" target="main"><b><?php echo $MSG_USER."-".$MSG_SETPASSWORD?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_SETPASSWORD?></p></td>
-    </tr>
-  <?php }?>
-
-  <?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])){?>
-    <tr>
-      <td><center><a class='btn btn-primary btn-sm' href="privilege_list.php" target="main"><b><?php echo $MSG_USER."-".$MSG_PRIVILEGE."-".$MSG_LIST?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_PRIVILEGE_LIST?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-primary btn-sm' href="privilege_add.php" target="main"><b><?php echo $MSG_USER."-".$MSG_PRIVILEGE."-".$MSG_ADD?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_ADD_PRIVILEGE?></p></td>
-    </tr>
-  <?php }?>
-
-  <?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])||isset($_SESSION[$OJ_NAME.'_'.'problem_editor'])){?>
-    <tr>
-      <td><center><a class='btn btn-success btn-sm' href="problem_list.php" target="main"><b><?php echo $MSG_PROBLEM."-".$MSG_LIST?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_PROBLEM_LIST?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-success btn-sm' href="problem_add_page.php" target="main"><b><?php echo $MSG_PROBLEM."-".$MSG_ADD?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_ADD_PROBLEM?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-success btn-sm' href="problem_import.php" target="main"><b><?php echo $MSG_PROBLEM."-".$MSG_IMPORT?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_IMPORT_PROBLEM?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-success btn-sm' href="problem_export.php" target="main"><b><?php echo $MSG_PROBLEM."-".$MSG_EXPORT?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_EXPORT_PROBLEM?></p></td>
-    </tr>
-  <?php }?>
-  <?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])||isset($_SESSION[$OJ_NAME.'_'.'contest_creator'])){?>
-    <tr>
-      <td><center><a class='btn btn-warning btn-sm' href="contest_list.php" target="main"><b><?php echo $MSG_CONTEST."-".$MSG_LIST?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_CONTEST_LIST?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-warning btn-sm' href="contest_add.php" target="main"><b><?php echo $MSG_CONTEST."-".$MSG_ADD?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_ADD_CONTEST?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-warning btn-sm' href="user_set_ip.php" target="main"><b><?php echo $MSG_CONTEST."-".$MSG_SET_LOGIN_IP?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_SET_LOGIN_IP?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-warning btn-sm' href="team_generate.php" target="main"><b><?php echo $MSG_CONTEST."-".$MSG_TEAMGENERATOR?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_TEAMGENERATOR?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-warning btn-sm' href="team_generate2.php" target="main"><b><?php echo $MSG_CONTEST."-".$MSG_TEAMGENERATOR?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_TEAMGENERATOR?></p></td>
-    </tr>
-  <?php }?>
-
-  <?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])){?>
-    <tr>
-      <td><center><a class='btn btn-danger btn-sm' href="rejudge.php" target="main"><b><?php echo $MSG_SYSTEM."-".$MSG_REJUDGE?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_REJUDGE?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-danger btn-sm' href="source_give.php" target="main"><b><?php echo $MSG_SYSTEM."-".$MSG_GIVESOURCE?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_GIVESOURCE?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-danger btn-sm' href="../online.php" target="main"><b><?php echo $MSG_SYSTEM."-".$MSG_HELP_ONLINE?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_ONLINE?></p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-danger btn-sm' href="update_db.php" target="main"><b><?php echo $MSG_SYSTEM."-".$MSG_UPDATE_DATABASE?></b></a></center></td>
-      <td><p><?php echo $MSG_HELP_UPDATE_DATABASE?></p></td>
-    </tr>
-    <tr>
-      <td><a class='btn btn-block btn-sm' href="https://github.com/zhblue/hustoj/" target="_blank"><b>HUSTOJ</b></a></td>
-      <td><p>HUSTOJ</p></td>
-    </tr>
-    <tr>
-      <td><center><a class='btn btn-sm' target='_blank' href="https://github.com/zhblue/hustoj/blob/master/wiki/FAQ.md" target="main"><?php echo $MSG_ADMIN." ".$MSG_FAQ?></a></center></td>
-      <td><p><?php echo $MSG_ADMIN." ".$MSG_FAQ?></p></td>
-    </tr>
-    <tr>
-      <td><a class='btn btn-block btn-sm' href="https://github.com/zhblue/freeproblemset/" target="_blank"><b>FreeProblemSet</b></a></td>
-      <td><p>FreeProblemSet</p></td>
-    </tr>
-    <tr>
-      <td><a class='btn btn-block btn-sm' href="http://tk.hustoj.com" target="_blank"><b>自助题库</b></a></td>
-      <td><p></p></td>
-    </tr>
-    <tr>
-      <td><a class='btn btn-block btn-sm' href="http://shang.qq.com/wpa/qunwpa?idkey=d52c3b12ddaffb43420d308d39118fafe5313e271769277a5ac49a6fae63cf7a" target="_blank">手机QQ加官方群23361372</a></td>
-      <td><p></p></td>
-    </tr>
-  <?php }?>
-  </tbody>
-</table>
-
-<?php if (isset($_SESSION[$OJ_NAME.'_'.'administrator'])&&!$OJ_SAE){?>
-  <a href="problem_copy.php" target="main" title="Create your own data"><font color="eeeeee">CopyProblem</font></a> <br>
-  <a href="problem_changeid.php" target="main" title="Danger,Use it on your own risk"><font color="eeeeee">ReOrderProblem</font></a>
-  
-<?php }?>
-
-</body>
-</html>
+    <div class="card" style="margin-top: 20px;">
+        <div class="card-title">🕐 最近提交</div>
+        <div class="card-body" style="padding: 0;">
+            <table class="recent-table">
+                <thead>
+                    <tr><th>ID</th><th>用户</th><th>题目</th><th>结果</th><th>时间</th></tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($recent_solutions) && is_array($recent_solutions)): ?>
+                        <?php foreach ($recent_solutions as $sol): ?>
+                        <tr>
+                            <td><?php echo $sol['solution_id']; ?></td>
+                            <td><?php echo htmlspecialchars($sol['user_id']); ?></td>
+                            <td><?php echo $sol['problem_id']; ?></td>
+                            <td>
+                                <?php
+                                $r = isset($result_map[$sol['result']]) ? $result_map[$sol['result']] : ['text' => 'Pending', 'color' => '#95a5a6'];
+                                ?>
+                                <span class="badge" style="background:<?php echo $r['color']; ?>"><?php echo $r['text']; ?></span>
+                            </td>
+                            <td><?php echo substr($sol['in_date'], 5, 11); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr><td colspan="5" style="text-align:center;color:#999;padding:30px;">暂无提交</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

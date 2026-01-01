@@ -1,4 +1,6 @@
 <?php 
+
+
 require_once("./include/db_info.inc.php");
 if(isset($OJ_REGISTER)&&!$OJ_REGISTER) exit(0);
 require_once("./include/my_func.inc.php");
@@ -12,6 +14,7 @@ $user_id=trim($_POST['user_id']);
 $len=mb_strlen($user_id);
 $email=trim($_POST['email']);
 $school=trim($_POST['school']);
+$group_name=isset($_POST['group_name']) ? trim($_POST['group_name']) : '';
 if(isset($OJ_VCODE)&&$OJ_VCODE)$vcode=trim($_POST['vcode']);
 if($OJ_VCODE&&($vcode!= $_SESSION[$OJ_NAME.'_'."vcode"]||$vcode==""||$vcode==null) ){
 	$_SESSION[$OJ_NAME.'_'."vcode"]=null;
@@ -54,6 +57,10 @@ if(has_bad_words($nick)){
         $err_str=$err_str.$MSG_NICK." $MSG_TOO_BAD!\\n";
         $err_cnt++;
 }
+if(has_bad_words($group_name)){
+        $err_str=$err_str.$MSG_GROUP_NAME." $MSG_TOO_BAD!\\n";
+        $err_cnt++;
+}
 
 if (strcmp($_POST['password'],$_POST['rptpassword'])!=0){
 	$err_str=$err_str."$MSG_WARNING_REPEAT_PASSWORD_DIFF!\\n";
@@ -66,6 +73,11 @@ if (strlen($_POST['password'])<6){
 $len=mb_strlen($_POST['school']);
 if ($len>20){
 	$err_str=$err_str."$MSG_SCHOOL $MSG_TOO_LONG!\\n";
+	$err_cnt++;
+}
+$len=mb_strlen($group_name);
+if ($len>16){
+	$err_str=$err_str."$MSG_GROUP_NAME $MSG_TOO_LONG!\\n";
 	$err_cnt++;
 }
 $len=mb_strlen($_POST['email']);
@@ -100,6 +112,7 @@ if ($domain==$DOMAIN && $OJ_NAME==$user_id){
 $nick=(htmlentities ($nick,ENT_QUOTES,"UTF-8"));
 $school=(htmlentities ($school,ENT_QUOTES,"UTF-8"));
 $email=(htmlentities ($email,ENT_QUOTES,"UTF-8"));
+$group_name=(htmlentities ($group_name,ENT_QUOTES,"UTF-8"));
 $ip = ($_SERVER['REMOTE_ADDR']);
 if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])&&!empty(trim($_SERVER['HTTP_X_FORWARDED_FOR']))) {
     $REMOTE_ADDR = $_SERVER['HTTP_X_FORWARDED_FOR'];
@@ -136,10 +149,15 @@ else
 
 if(isset($OJ_REG_NEED_CONFIRM)&&$OJ_REG_NEED_CONFIRM) $defunct="Y";
 else $defunct="N";
+// 如果用户没有填写班级，使用 getMappedSpecial 作为默认值
+$final_group_name = !empty($group_name) ? $group_name : getMappedSpecial($user_id);
 $sql="INSERT INTO `users`("
 ."`user_id`,`email`,`ip`,`accesstime`,`password`,`reg_time`,`nick`,`school`,`group_name`,`defunct`,activecode)"
 ."VALUES(?,?,?,NOW(),?,NOW(),?,?,?,?,?)";
-$rows=pdo_query($sql,$user_id,$email,$ip,$password,$nick,$school,getMappedSpecial($user_id),$defunct,$_SESSION[$OJ_NAME.'_'.'activecode']);// or die("Insert Error!\n");
+$rows=pdo_query($sql,$user_id,$email,$ip,$password,$nick,$school,$final_group_name,$defunct,$_SESSION[$OJ_NAME.'_'.'activecode']);// or die("Insert Error!\n");
+
+// 第一个注册用户自动成为管理员
+pdo_query("CALL DEFAULT_ADMINISTRATOR(?)", $user_id);
 
 //发送激活邮件
 if (isset($OJ_EMAIL_CONFIRM) && $OJ_EMAIL_CONFIRM ) {
@@ -175,5 +193,5 @@ if(!isset($OJ_REG_NEED_CONFIRM)||!$OJ_REG_NEED_CONFIRM){
 	}
 }
 ?>
-<script>history.go(-2);</script>
+<script>window.location.href='index.php';</script>
 

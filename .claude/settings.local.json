@@ -6,7 +6,8 @@
       "Bash(copy:*)",
       "Bash(cmd /c copy:*)",
       "Bash(cmd /c \"copy /Y \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\二开\\page1_bg.jpg\"\" \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\trunk\\web\\template\\sweet\\img\\page1_bg.jpg\"\" && copy /Y \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\二开\\page3_bg.jpg\"\" \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\trunk\\web\\template\\sweet\\img\\page3_bg.jpg\"\" && copy /Y \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\二开\\star.png\"\" \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\trunk\\web\\template\\sweet\\img\\star.png\"\" && copy /Y \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\二开\\light_1.png\"\" \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\trunk\\web\\template\\sweet\\img\\light_1.png\"\" && copy /Y \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\二开\\light_2.png\"\" \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\trunk\\web\\template\\sweet\\img\\light_2.png\"\" && copy /Y \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\二开\\light_3.png\"\" \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\trunk\\web\\template\\sweet\\img\\light_3.png\"\" && copy /Y \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\二开\\light_4.png\"\" \"\"C:\\Users\\15385\\Documents\\CodeProject\\hustoj-25.12.10\\trunk\\web\\template\\sweet\\img\\light_4.png\"\"\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(php:*)"
     ],
     "deny": [],
     "ask": []

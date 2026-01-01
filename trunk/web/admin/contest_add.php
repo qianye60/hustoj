@@ -1,10 +1,10 @@
 <?php
-  
+
   require_once("../include/db_info.inc.php");
   require_once("../lang/$OJ_LANG.php");
   require_once("../include/const.inc.php");
+  header("Cache-control:private");
   require_once("admin-header.php");
-   header("Cache-control:private"); 
 if(!(isset($_SESSION[$OJ_NAME.'_'.'administrator'])||isset($_SESSION[$OJ_NAME.'_'.'contest_creator']))){
     echo "<a href='../loginpage.php'>Please Login First!</a>";
     exit(1);
@@ -137,13 +137,15 @@ else{
   }
   else if(isset($_POST['problem2contest'])){
     $plist = "";
-    
-    sort($_POST['pid']);
-    foreach($_POST['pid'] as $i){       
-      if($plist)
-      $plist.=','.intval($i);
-      else
-        $plist=$i;
+
+    if(isset($_POST['pid']) && is_array($_POST['pid'])){
+      sort($_POST['pid']);
+      foreach($_POST['pid'] as $i){
+        if($plist)
+        $plist.=','.intval($i);
+        else
+          $plist=$i;
+      }
     }
   $plist = trim($_POST['hlist']);
   $pieces = explode(",",$plist );
