@@ -297,7 +297,27 @@ document.addEventListener('keydown', function(e) {
   position: absolute;
   top:350px;
   left: 0;
-  cursor: col-resize; /* 显示可调整宽度的光标 */
+  cursor: col-resize;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+}
+#dragButton:hover {
+  background-color: #666;
+}
+#dragButton::after {
+  content: "双击重置";
+  position: absolute;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #999;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#dragButton:hover::after {
+  opacity: 1;
 }
 </style>
   <script type="text/javascript">
@@ -308,8 +328,8 @@ document.addEventListener('keydown', function(e) {
 			let width=parseInt(document.body.clientWidth*0.3);
 			let width2=parseInt(document.body.clientWidth*0.7);
 <?php }else{ ?>
-			let width=parseInt(document.body.clientWidth*0.6);
-			let width2=parseInt(document.body.clientWidth*0.4);
+			let width=parseInt(document.body.clientWidth*0.5);
+			let width2=parseInt(document.body.clientWidth*0.5);
 <?php } ?>
         let submitURL=$("#submit")[0].href;
 	<?php 
@@ -377,10 +397,22 @@ $(document).ready(function() {
         if (isDragging) {
             let diffX = event.pageX - startX;
             let newWidth = initialWidth + diffX;
+            // 限制宽度范围：最小20%，最大80%
+            let minWidth = parseInt(document.body.clientWidth * 0.2);
+            let maxWidth = parseInt(document.body.clientWidth * 0.8);
+            newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
             $("#main").css("width", newWidth);
             $("#submitPage").css("right", "-" + newWidth + "px");
             $("#submitPage").find("iframe").attr("width", document.body.clientWidth - newWidth + "px");
         }
+    });
+
+    // 双击恢复默认50%宽度
+    $("#dragButton").dblclick(function() {
+        let defaultWidth = parseInt(document.body.clientWidth * 0.5);
+        $("#main").css("width", defaultWidth);
+        $("#submitPage").css("right", "-" + defaultWidth + "px");
+        $("#submitPage").find("iframe").attr("width", defaultWidth + "px");
     });
 
     // 鼠标释放时停止拖拽，恢复原始颜色

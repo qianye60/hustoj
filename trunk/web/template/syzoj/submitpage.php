@@ -2,963 +2,700 @@
 <?php $show_title="$MSG_SUBMIT - $OJ_NAME"; ?>
 <?php include("template/$OJ_TEMPLATE/header.php");?>
 
-  <style>
-#source {
-    width: 80%;
-    height: 600px;
-    background-color:rgb(255,225,225,0.5);
-}
-
-.ace-chrome .ace_marker-layer .ace_active-line{   /*当前行*/
-   background-color: rgba(0,0,199,0.3);
-}
-            .button, input, optgroup, select, textarea {  /*选择题的题号大小*/
-    font-family: sans-serif;
-    font-size: 150%;
-    line-height: 1.2;
-
-}
-<?php if (time() < strtotime('2025-3-31')) { ?>
-body{
-        background: url("http://m.hustoj.com:8090/bg/nz.gif") 0% 0% / 100% no-repeat;
-}
-<?php } ?>
- /* 定义错误行的样式 */
-  .ace_error_marker {
-    position: absolute;
-    background-color: rgba(255, 0, 0, 0.3); /* 红色半透明背景 */
-  }
-  </style>
-    
-<center>
-
-<script src="<?php echo $OJ_CDN_URL?>include/checksource.js"></script>
-<form id=frmSolution action="submit.php<?php if (isset($_GET['spa'])) echo "?spa" ?>" method="post" onsubmit='do_submit()' enctype="multipart/form-data" >
-<?php if (!isset($_GET['spa']) || $solution_name ) {?>
-        <input type='file' name='answer' placeholder='Upload answer file' >
-<?php } ?>
-
-<?php if (isset($id)){?>
-<span style="color:#0000ff">Problem <b><?php echo $id?></b></span>
-<input id=problem_id type='hidden' value='<?php echo $id?>' name="id" >
-<?php }else{
-//$PID="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-//if ($pid>25) $pid=25;
-?>
-Problem <span class=blue><b><?php echo chr($pid+ord('A'))?></b></span> of Contest <span class=blue><b><?php echo $cid?></b></span>
-<input id="cid" type='hidden' value='<?php echo $cid?>' name="cid">
-<input id="pid" type='hidden' value='<?php echo $pid?>' name="pid">
-<?php }?>
-<span id="language_span">Language: 
-<select id="language" name="language" onChange="reloadtemplate($(this).val());" >
-<?php
-$lang_count=count($language_ext);
-if(isset($_GET['langmask']))
-	$langmask=$_GET['langmask'];
-else
-	$langmask=$OJ_LANGMASK;
-$langmask|=$OJ_LANGMASK;
-
-$lang=(~((int)$langmask))&((1<<($lang_count))-1);
-//$lastlang=$_COOKIE['lastlang'];
-//if($lastlang=="undefined") $lastlang=1;
-for($i=0;$i<$lang_count;$i++){
-if($lang&(1<<$i))
-echo"<option value=$i ".( $lastlang==$i?"selected":"").">
-".$language_name[$i]."
-</option>";
-}
-?>
-</select>
-<?php if($OJ_VCODE){?>
-<?php echo $MSG_VCODE?>:
-<input name="vcode" size=4 type=text autocomplete=off ><img id="vcode" alt="click to change" src="vcode.php" onclick="this.src='vcode.php?'+Math.random()">
-<?php }?>
-<button  id="Submit" type="button" class="ui primary icon button"  onclick="do_submit();"><?php echo $MSG_SUBMIT?></button> 
-<label id="countDown" ></label>
-<?php if (isset($OJ_ENCODE_SUBMIT)&&$OJ_ENCODE_SUBMIT){?>
-<input class="btn btn-success" title="WAF gives you reset ? try this." type=button value="Encoded <?php echo $MSG_SUBMIT?>"  onclick="encoded_submit();">
-<input type=hidden id="encoded_submit_mark" name="reverse2" value="reverse"/>
-<?php }?>
-<?php if (isset($_SESSION[$OJ_NAME.'_administrator'])){?>
-<input class="btn btn-danger" title="AI everythin..." type=button value="AI一下"  onclick="ai_gen('Main.'+$('#language option:selected').text().trim());" id='ai_bt'>
-<?php }?>
-<!--选择题状态-->
-<?php if ($spj>1 || !$OJ_TEST_RUN ){?>
-<span class="btn" id=result><?php echo $MSG_STATUS?></span>	
-<?php }?>
-</span>
-<?php if($spj <= 1 &&  !$solution_name){ ?>
-    <button onclick="toggleTheme(event)" style="background-color: bisque; position: absolute; top: 5px; right:70px;" v-if="false">
-        <i>🌗</i>
-    </button>
-    <button onclick="increaseFontSize(event)" style="background-color: bisque; position: absolute; top: 5px; right:40px;" v-if="false">
-        <i>➕</i>
-    </button>
-    <button onclick="decreaseFontSize(event)" style="background-color: bisque; position: absolute; top: 5px; right:10px;" v-if="false">
-        <i>➖</i>
-    </button>
-<?php } ?>
-
-<?php 
-        if(!$solution_name){
-                if($OJ_ACE_EDITOR){
-                        if (isset($OJ_TEST_RUN)&&$OJ_TEST_RUN)
-                                $height="400px";
-                        else
-                                $height="500px";
-                ?>
-                <pre style="width:99%;height:<?php echo $height?>" cols=180 rows=16 id="source"><?php echo htmlentities($view_src,ENT_QUOTES,"UTF-8")?></pre>
-                <input type=hidden id="hide_source" name="source" value=""/>
-
-        <?php }else{ ?>
-                <textarea style="width:80%;height:600" cols=180 rows=30 id="source" name="source"><?php echo htmlentities($view_src,ENT_QUOTES,"UTF-8")?></textarea>
-        <?php }
-
-        }else{
-                echo "<br><h2>指定上传文件：$solution_name</h2>";
-
-        }
-
-	?>
 <style>
-            .button, input, optgroup, select, textarea {
-    font-family: sans-serif;
-    font-size: 150%;
-    line-height: 1.15;
+* { box-sizing: border-box; }
+
+.submit-wrap {
+    width: 100%;
+    max-width: 100%;
     margin: 0;
-    background: border-box;
+    padding: 15px;
+    height: calc(100vh - 50px);
+    display: flex;
+    overflow: hidden;
 }
-        #reinfo {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 8px;
-            margin-top: 10px;
-        }
 
-        #reinfo div {
-            border-radius: 4px;
-            padding: 1px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            transition: all 0.15s;
-            cursor: default;
-	    opacity: 0.95;
-        }
-        </style>
-         <div class="row">
-            <div class="column" style="display: flex;">
-<?php if ( isset($OJ_TEST_RUN) && $OJ_TEST_RUN && $spj<=1 && !$solution_name  ){?>
-<div style="
-   
-     margin-left: 60px;
-    width: 40%;
-     padding: 14px;
-    flex-direction: column;">
-        <div style="  
-        display: flex;
-    border-radius: 8px;
-    background-color: rgb(255,255,255,0.4);" id="language_span"><?php echo $MSG_Input?></div>
-         <textarea style="width:100%" cols=40 rows=5 id="input_text" name="input_text" ><?php echo $view_sample_input?></textarea>
-    </div>
-    <div style="
-   
-    width: 40%;
+#frmSolution {
+    flex: 1;
+    display: flex;
     flex-direction: column;
-    ">
-         <div style="    display: flex;
-   
-    border-radius: 8px;
-    background-color: rgb(255,255,255,0.4);justify-content: space-between;" id="language_span"><?php echo $MSG_Output ?>
-    
-   <span class="btn" id=result><?php echo $MSG_STATUS?></span>	
-    
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.submit-box {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+}
+
+.submit-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.submit-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.submit-toolbar {
+    padding: 8px 15px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.toolbar-sep {
+    width: 1px;
+    height: 20px;
+    background: #ddd;
+    margin: 0 5px;
+}
+
+.code-area {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+#source {
+    width: 100%;
+    flex: 1;
+    height: auto;
+    min-height: 240px;
+    padding: 15px;
+    border: none;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 17px;
+    line-height: 1.5;
+    resize: vertical;
+    background: #282a36;
+    color: #f8f8f2;
+    outline: none;
+}
+
+.CodeMirror {
+    flex: 1;
+    height: 100% !important;
+    min-height: 240px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 17px;
+    border: none;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* CodeMirror内部滚动 */
+.CodeMirror-scroll {
+    overflow: auto !important;
+}
+
+.CodeMirror-sizer {
+    max-width: 100% !important;
+}
+
+.CodeMirror ~ #source {
+    display: none;
+}
+
+.code-status {
+    padding: 8px 15px;
+    background: #282a36;
+    color: #888;
+    font-size: 12px;
+    font-family: monospace;
+    display: flex;
+    justify-content: space-between;
+}
+
+.code-status.light-theme {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.test-area {
+    padding: 10px 15px;
+    background: #f9f9f9;
+    border-top: 1px solid #eee;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+    .test-area { grid-template-columns: 1fr; }
+}
+
+.io-box {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.io-box-title {
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.io-box textarea {
+    width: 100%;
+    height: 60px;
+    padding: 8px;
+    border: none;
+    font-family: monospace;
+    font-size: 13px;
+    resize: none;
+}
+
+/* 按钮 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn:hover { background: #f5f5f5; }
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.btn-sm i, .btn-sm svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-primary {
+    background: #4a90d9;
+    color: #fff;
+    border-color: #4a90d9;
+}
+
+.btn-primary:hover { background: #3a7bc8; }
+
+.btn-success {
+    background: #5cb85c;
+    color: #fff;
+    border-color: #5cb85c;
+}
+
+.btn-success:hover { background: #4cae4c; }
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 选择框 */
+.form-select {
+    padding: 8px 30px 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='m7 10 5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 8px center;
+    cursor: pointer;
+}
+
+.form-input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.vcode-img {
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.status-tag {
+    padding: 4px 10px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #666;
+}
+
+.file-upload {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+/* AC 弹窗样式 */
+.ac-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+.ac-popup {
+    text-align: center;
+    animation: acPopIn 0.3s ease;
+}
+.ac-popup img {
+    max-width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+@keyframes acPopIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+
+<!-- CodeMirror 5 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/go/go.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="<?php echo $OJ_CDN_URL?>include/checksource.js"></script>
+
+<div class="submit-wrap">
+<form id="frmSolution" action="submit.php<?php if (isset($_GET['spa'])) echo "?spa" ?>" method="post" onsubmit="do_submit()" enctype="multipart/form-data">
+
+<div class="submit-box">
+    <div class="submit-header">
+        <h3>
+            <?php if (isset($id)){ ?>
+                Problem <strong><?php echo $id?></strong>
+                <input id="problem_id" type="hidden" value="<?php echo $id?>" name="id">
+            <?php }else{ ?>
+                Problem <strong><?php echo chr($pid+ord('A'))?></strong> - Contest <?php echo $cid?>
+                <input id="cid" type="hidden" value="<?php echo $cid?>" name="cid">
+                <input id="pid" type="hidden" value="<?php echo $pid?>" name="pid">
+            <?php }?>
+        </h3>
+        <div>
+            <span id="result" class="status-tag"><?php echo $MSG_STATUS?></span>
+            <label id="countDown" style="display:none;margin-left:10px;color:#e67e22;"></label>
+        </div>
     </div>
 
-	<span id='reinfo' style="display:none"></span>
-          <textarea style="
-          width:100%;background-color: white;
-          " cols=30 rows=5 id="out" name="out" disabled="true" placeholder='<?php echo htmlentities($view_sample_output,ENT_QUOTES,'UTF-8')?>' ></textarea>    
-     </div>
-<?php }else{  ?>
-   <div style="margin-left: 5px; width: 95%; padding: 14px; flex-direction: column;">
-	<span id='reinfo' style="display:none"></span>
-   </div>
-<?php }	 ?>
-<?php if (isset($OJ_TEST_RUN)&&$OJ_TEST_RUN && $spj<=1 && !$solution_name  ){?>
-        <!--运行按钮-->
-            <input style="
-             margin-top: 30px;
-            margin-left: 15px ;
-            width: 7%;background-color: #22ba46a3;border-color: #00fff470;height: 130px;
-            " id="TestRun" class="btn btn-info" type=button value="<?php echo $MSG_TR?>" onclick=do_test_run();>
-            
-            <?php }?>
-            
-        </div>
- </div>
-        </div>
-         <input type="hidden" value="0" id="problem_id" name="problem_id"/>
-    </form>
-<?php if (isset($OJ_BLOCKLY)&&$OJ_BLOCKLY){?>
-	<input id="blockly_loader" type=button class="btn" onclick="openBlockly()" value="<?php echo $MSG_BLOCKLY_OPEN?>" style="color:white;background-color:rgb(169,91,128)">
-	<input id="transrun" type=button  class="btn" onclick="loadFromBlockly() " value="<?php echo $MSG_BLOCKLY_TEST?>" style="display:none;color:white;background-color:rgb(90,164,139)">
-<div id="blockly" class="center">Blockly</div>
-<?php }?> 
-</form>
-</center>
-<script type="module" src="<?php echo $OJ_CDN_URL?>sqlite/sqlite3.js"></script>
-<script>
-var sid=0;
-var i=0;
-var using_blockly=false;
-var judge_result=[<?php
-foreach($judge_result as $result){
-    echo "'$result',";
-}
-?>''];
-function removeContentBeforeSeparator(text) {
-    // 查找分隔符 "--|--|--|--|--" 的位置
-    const separator = "filename|size|result|memory|time";
-    const separatorIndex = text.indexOf(separator);
-
-    // 如果找到了分隔符
-    if (separatorIndex !== -1) {
-        // 计算分隔符结束的位置
-        const separatorEndIndex = separatorIndex ;
-
-        // 删除分隔符及其之前的所有内容，返回剩余部分
-        return text.substring(separatorEndIndex);
-    }
-
-    // 如果没有找到分隔符，返回原始字符串
-    return text;
-}
-function parseToCompactCards(data) {
-	console.log(data);
-	data=removeContentBeforeSeparator(data);
-	const lines = data.trim().split('\n');
-	const headers = lines[0].split('|');
-	const dataLines = lines.slice(2);
-	
-	const resultContainer = $('#reinfo');
-	resultContainer.empty();
-	resultContainer.show();
-	
-	// 统计结果
-	let acCount = 0, waCount = 0, reCount = 0;
-	
-	dataLines.forEach(line => {
-	    if (line.trim() === '') return;
-	    
-	    const values = line.split('|');
-	    const item = {};
-	    
-	    headers.forEach((header, index) => {
-		item[header] = values[index] || '';
-	    });
-	    
-	    // 确定结果类型
-	    const resultType = item.result.split('/')[0];
-	    let resultClass = 'warning'; // 默认
-	    
-	    if (resultType === 'AC') {
-		resultClass = 'success';
-	    } else if (resultType === 'PE') {
-		resultClass = 'info';
-		reCount++;
-	    } else if (resultType === 'WA') {
-		resultClass = 'danger';
-		reCount++;
-	    } else {
-		acCount++;
-	    }
-	    
-	    // 创建紧凑卡片
-	    const $card = $(`
-		<div class="label label-${resultClass}" title="${item.filename}">
-		    <span class="filename">${item.filename}</span>
-		    <span class="size">${item.size} B</span><br>
-		    <span class="result">${item.result}</span><br>
-			<span class="stat-item">
-			    <span class="stat-label">内存:</span>
-			    <span class="stat-value">${item.memory}</span>
-			</span><br>
-			<span class="stat-item">
-			    <span class="stat-label">时间:</span>
-			    <span class="stat-value">${item.time}</span>
-			</span>
-		</div>
-	    `);
-	    
-	    resultContainer.append($card);
-	});
-	
-	// 更新统计信息
-	const totalCount = acCount + waCount + reCount;
-	const passRate = totalCount > 0 ? ((acCount / totalCount) * 100).toFixed(1) : 0;
-	
-	$('#statsSummary').html(`
-	    <div class="stats-item">总计: <span class="stats-value">${totalCount}</span></div>
-	    <div class="stats-item">通过率: <span class="stats-value">${passRate}%</span></div>
-	    <div class="stats-item">AC: <span class="stats-value ac-count">${acCount}</span></div>
-	    <div class="stats-item">WA: <span class="stats-value wa-count">${waCount}</span></div>
-	    <div class="stats-item">RE: <span class="stats-value re-count">${reCount}</span></div>
-	`);
-}
-function print_result(solution_id) {
-var sid = solution_id;
-
-$.ajax({
-url: "status-ajax.php",
-type: "GET",
-data: { tr: 1, solution_id: solution_id },
-success: function(data) {
-    $("#out").val(data);
-     console.log(jresult);
-    var resultVariable = data;
-     if (jresult== 11) {
-	$("#out").show();
-	var errorLines = [];
-
-	var regex = /(\w+\.<?php echo $language_ext[$lastlang]?>):(\d+):\d+:/g;
-	var match;
-	while ((match = regex.exec(resultVariable)) !== null) {
-	    var lineNumber = parseInt(match[2], 10);
-	    errorLines.push(lineNumber);
-	}
-	
-	errorLines.forEach(function(line) {
-	    var Range = ace.require("ace/range").Range;
-	    var range = new Range(line - 1, 0, line - 1, Infinity);
-	    editor.getSession().addMarker(range, "ace_error_marker", "fullLine", false);
-	});
-     }else if(jresult==13){
-	$("#reinfo").hide();
-	$("#out").show();
-     }else{
-	$("#out").hide();
-	$("#reinfo").show();
-	parseToCompactCards(data);	
-     }
-     
-},
-error: function(xhr, status, error) {
-    console.error("Error fetching data: ", error);
-}
-});
-}
-function fancy(td){
-$("body",parent.document).append("<div id='bannerFancy' style='position:absolute;top:0px;left:0px;width:100%;z-index:3' class='ui main container'></div><audio autoplay=\"autoplay\" preload=\"auto\" src=\"<?php echo $OJ_FANCY_MP3 ?>\"> </audio>");
-window.setTimeout("$(\"#bannerFancy\",parent.document).html(\"<iframe border=0 src='fancy.php' width='100%' height='800px'></iframe>\");",500);
-window.setTimeout("$(\"#bannerFancy\",parent.document).remove();",10000);
-}
-function fresh_result(solution_id)
-{
-var tb=window.document.getElementById('result');
-if(solution_id==undefined){
-	tb.innerHTML="Vcode Error!";		
-	if($("#vcode")!=null) $("#vcode").click();
-	return ;
-}
-
-sid=parseInt(solution_id);
-if(sid<=0){
-	tb.innerHTML="<?php echo  str_replace("10",$OJ_SUBMIT_COOLDOWN_TIME,$MSG_BREAK_TIME) ?>";
-	if($("#vcode")!=null) $("#vcode").click();
-	return ;
-}
-
-var xmlhttp;
-if (window.XMLHttpRequest)
-{// code for IE7+, Firefox, Chrome, Opera, Safari
-xmlhttp=new XMLHttpRequest();
-}
-else
-{// code for IE6, IE5
-xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-}
-xmlhttp.onreadystatechange=function()
-	{
-		if (xmlhttp.readyState==4 && xmlhttp.status==200)
-		{
-			var r=xmlhttp.responseText;
-			if(r=="<?php echo $OJ_NOIP_KEYWORD?>") {
-				alert("<?php echo $MSG_SUBMIT.$MSG_SUCCESS.$contest_locks[4]?>");
-				tb.innerHTML="<?php echo $contest_locks[4]?>";
-				return;
-			}
-			var ra=r.split(",");
-			// alert(r);
-			// alert(judge_result[r]);
-			var loader="<img width=18 src=image/loader.gif>";
-			var tag="span";
-			window.jresult = ra[0];
-			if(ra[0]<4) tag="span disabled=true";
-			else tag="a";
-			{
-				if(ra[0]==11||ra[0]>15)
-					tb.innerHTML="<"+tag+" href='ceinfo.php?sid="+solution_id+"' class='badge badge-info' target=_blank>"+judge_result[ra[0]]+"</"+tag+">";
-				else
-					tb.innerHTML="<"+tag+" href='reinfo.php?sid="+solution_id+"' class='badge badge-info' target=_blank>"+judge_result[ra[0]]+"AC:"+ra[4]+"</"+tag+">";
-			}
-			if(ra[0]<4||ra[0]>15)
-				tb.innerHTML+=loader;
-			tb.innerHTML+="Memory:"+ra[1]+"&nbsp;&nbsp;";
-			tb.innerHTML+="Time:"+ra[2]+"";
-			if(ra[0]<4||ra[0]>15)
-				window.setTimeout("fresh_result("+solution_id+")",2000);
-			else{
-				window.setTimeout("print_result("+solution_id+")",2000);
-				count=1;
-			}
-			<?php if ( $OJ_FANCY_RESULT ) {?>
-				if(ra[0]==4) fancy(tb);
-			<?php } ?>
-		}
-	}
-	xmlhttp.open("GET","status-ajax.php?solution_id="+solution_id,true);
-	xmlhttp.send();
-}
-function getSID(){
-var ofrm1 = document.getElementById("testRun").document;
-var ret="0";
-if (ofrm1==undefined)
-{
-ofrm1 = document.getElementById("testRun").contentWindow.document;
-var ff = ofrm1;
-ret=ff.innerHTML;
-}
-else
-{
-var ie = document.frames["frame1"].document;
-ret=ie.innerText;
-}
-return ret+"";
-}
-var count=0;
- 
-function encoded_submit(){
-
-      var mark="<?php echo isset($id)?'problem_id':'cid';?>";
-        var problem_id=document.getElementById(mark);
-
-	if(typeof(editor) != "undefined")
-		$("#hide_source").val(editor.getValue());
-        if(mark=='problem_id')
-                problem_id.value='<?php if(isset($id)) echo $id?>';
-        else
-                problem_id.value='<?php if(isset($cid))echo $cid?>';
-
-        document.getElementById("frmSolution").target="_self";
-        document.getElementById("encoded_submit_mark").name="encoded_submit";
-        var source=$("#source").val();
-	if(typeof(editor) != "undefined") {
-		source=editor.getValue();
-        	$("#hide_source").val(encode64(utf16to8(source)));
-	}else{
-        	$("#source").val(encode64(utf16to8(source)));
-	}
-//      source.value=source.value.split("").reverse().join("");
-//      alert(source.value);
-        document.getElementById("frmSolution").submit();
-}
-
-function do_submit(){
-	 $("#Submit").attr("disabled","true");   // mouse has a bad key1
-	if(using_blockly) 
-		 translate();
-	if(typeof(editor) != "undefined"){ 
-		$("#hide_source").val(editor.getValue());
-	}
-	var mark="<?php echo isset($id)?'problem_id':'cid';?>";
-	var problem_id=document.getElementById(mark);
-	if(mark=='problem_id')
-	problem_id.value='<?php if (isset($id))echo $id?>';
-	else
-	problem_id.value='<?php if (isset($cid))echo $cid?>';
-	document.getElementById("frmSolution").target="_self";
-	
-<?php if(isset($_GET['spa'])){?>
-	<?php if($solution_name) { ?>document.getElementById("frmSolution").submit(); <?php } ?>  //如果是指定文件名，则强制用文件post方式提交。
-        $.post("submit.php?ajax",$("#frmSolution").serialize(),function(data){fresh_result(data);});
-        $("#Submit").prop('disabled', true);
-        $("#TestRun").prop('disabled', true);
-        count=<?php echo $OJ_SUBMIT_COOLDOWN_TIME?> * 2 ;
-        handler_interval= window.setTimeout("resume();",1000);
-	 <?php if(isset($OJ_REMOTE_JUDGE)&&$OJ_REMOTE_JUDGE) {?>$("#sk").attr("src","remote.php"); <?php } ?>
-<?php }else{?>
-        document.getElementById("frmSolution").submit();
-<?php }?>
-
-}
-<?php
-
-        $appendsource="";
-		if(isset($id)){
-                $append_file = "$OJ_DATA/$id/append.sql";
-                if (isset($OJ_APPENDCODE) && $OJ_APPENDCODE && file_exists($append_file)) {
-                  $appendsource .= "\n".file_get_contents($append_file);
-                }
+    <div class="submit-toolbar">
+        <select id="language" name="language" class="form-select" onchange="reloadtemplate(this.value);">
+        <?php
+        $lang_count=count($language_ext);
+        $langmask = isset($_GET['langmask']) ? $_GET['langmask'] : $OJ_LANGMASK;
+        $langmask |= $OJ_LANGMASK;
+        $lang = (~((int)$langmask)) & ((1<<($lang_count))-1);
+        for($i=0; $i<$lang_count; $i++){
+            if($lang & (1<<$i))
+                echo "<option value='$i' ".($lastlang==$i?"selected":"").">".$language_name[$i]."</option>";
         }
-        echo "var appendSQL=".json_encode($appendsource).";";
+        ?>
+        </select>
 
-?>
+        <?php if($OJ_VCODE){ ?>
+        <span class="toolbar-sep"></span>
+        <input name="vcode" class="form-input" style="width:70px;" type="text" autocomplete="off" placeholder="验证码">
+        <img id="vcode" class="vcode-img" src="vcode.php" onclick="this.src='vcode.php?'+Math.random()">
+        <?php }?>
 
-function startSQL (sqlite3,input_sql,user_sql){
- // log('Running SQLite3 version', sqlite3.version.libVersion);
-  const db = new sqlite3.oo1.DB('/mydb.sqlite3', 'ct');
- // log('Created transient database', db.filename);
+        <span class="toolbar-sep"></span>
+        <button type="button" class="btn btn-sm" onclick="toggleTheme()" title="切换主题"><i data-lucide="sun-moon"></i></button>
+        <button type="button" class="btn btn-sm" onclick="increaseFontSize()" title="放大"><i data-lucide="zoom-in"></i></button>
+        <button type="button" class="btn btn-sm" onclick="decreaseFontSize()" title="缩小"><i data-lucide="zoom-out"></i></button>
 
-  try {
-   // log('Creating a table...');
-    try{
-            db.exec(input_sql);
-    }finally{};
-   // log('Query data with exec()...');
-    db.exec({
-      sql: user_sql+appendSQL,
-      callback: (row) => {
-        $("#out").val($("#out").val()+(row.join("|")+"\n"));
-        console.log(row);
-      },
+        <div style="flex:1;"></div>
+
+        <?php if (isset($_SESSION[$OJ_NAME.'_administrator'])){ ?>
+        <button class="btn btn-sm" type="button" onclick="ai_gen('Main.c');" id="ai_bt">AI</button>
+        <?php }?>
+
+        <?php if (isset($OJ_ENCODE_SUBMIT) && $OJ_ENCODE_SUBMIT){ ?>
+        <button class="btn btn-sm" type="button" onclick="encoded_submit();">编码提交</button>
+        <input type="hidden" id="encoded_submit_mark" name="reverse2" value="reverse"/>
+        <?php }?>
+
+        <button id="Submit" type="button" class="btn btn-primary" onclick="do_submit();"><?php echo $MSG_SUBMIT?></button>
+    </div>
+
+    <?php if (!isset($_GET['spa']) || $solution_name) { ?>
+    <div class="file-upload">
+        <input type="file" name="answer">
+    </div>
+    <?php } ?>
+
+    <?php if(!$solution_name){ ?>
+    <div class="code-area">
+        <textarea id="source" name="source" spellcheck="false"><?php echo htmlentities($view_src,ENT_QUOTES,"UTF-8")?></textarea>
+        <div id="code-status" class="code-status">
+            <span id="line-info">行: 1, 列: 1</span>
+            <span id="char-count">0 字符</span>
+        </div>
+    </div>
+    <?php }else{
+        echo "<div style='padding:40px;text-align:center;'><h3>指定上传文件：<span style='color:red;'>$solution_name</span></h3></div>";
+    } ?>
+
+    <?php if (isset($OJ_TEST_RUN) && $OJ_TEST_RUN && $spj<=1 && !$solution_name){ ?>
+    <div class="test-area">
+        <div class="io-box">
+            <div class="io-box-title"><?php echo $MSG_Input?></div>
+            <textarea id="input_text" name="input_text"><?php echo $view_sample_input?></textarea>
+        </div>
+        <div class="io-box">
+            <div class="io-box-title" style="display:flex;justify-content:space-between;">
+                <span><?php echo $MSG_Output?></span>
+                <span id="result2" class="status-tag"><?php echo $MSG_STATUS?></span>
+            </div>
+            <textarea id="out" name="out" disabled placeholder="<?php echo htmlentities($view_sample_output,ENT_QUOTES,'UTF-8')?>"></textarea>
+        </div>
+        <button id="TestRun" class="btn btn-success" type="button" onclick="do_test_run();" style="align-self:stretch;">
+            ▶ <?php echo $MSG_TR?>
+        </button>
+    </div>
+    <?php }?>
+</div>
+
+<input type="hidden" value="0" id="problem_id" name="problem_id"/>
+</form>
+</div>
+
+<!-- AC 弹窗 -->
+<div id="acPopup" class="ac-popup-overlay" onclick="hideAcPopup()">
+    <div class="ac-popup">
+        <img src="image/ac.png" alt="AC">
+    </div>
+</div>
+
+<script src="<?php echo $OJ_CDN_URL?>include/base64.js"></script>
+<script>
+// AC 弹窗函数
+function showAcPopup() {
+    var popup = document.getElementById('acPopup');
+    popup.style.display = 'flex';
+    setTimeout(hideAcPopup, 3000); // 3秒后自动关闭
+}
+function hideAcPopup() {
+    document.getElementById('acPopup').style.display = 'none';
+}
+
+var currentFontSize = 17;
+var isDarkTheme = true;
+var count = 0;
+var handler_interval;
+var _lastlang = <?php echo isset($lastlang) ? intval($lastlang) : 0; ?>;
+var _userKey = <?php echo json_encode(isset($_SESSION[$OJ_NAME.'_user_id']) ? $_SESSION[$OJ_NAME.'_user_id'] : 'guest'); ?>;
+var judge_result = [<?php foreach($judge_result as $r){ echo "'$r',"; } ?>''];
+
+var editor = null;
+var langModes = ['text/x-csrc','text/x-c++src','text/x-pascal','text/x-java','text/x-ruby','text/x-sh','text/x-python','text/x-php','text/x-perl','text/x-csharp','text/x-objectivec','text/x-vb','text/x-scheme','text/x-csrc','text/x-c++src','text/x-lua','text/javascript','text/x-go','text/x-sql','text/x-fortran','text/x-octave','text/x-cobol','text/x-rsrc','text/x-csrc','text/x-python'];
+
+// 主题切换
+function toggleTheme() {
+    if (!editor) return;
+    var status = document.getElementById('code-status');
+    isDarkTheme = !isDarkTheme;
+    if (isDarkTheme) {
+        editor.setOption('theme', 'dracula');
+        status.classList.remove('light-theme');
+    } else {
+        editor.setOption('theme', 'eclipse');
+        status.classList.add('light-theme');
+    }
+}
+
+function applyEditorFontSize() {
+    if (!editor) return;
+    var wrapper = (typeof editor.getWrapperElement === 'function') ? editor.getWrapperElement() : null;
+    if (!wrapper) wrapper = document.querySelector('.CodeMirror');
+    if (wrapper) wrapper.style.fontSize = currentFontSize + 'px';
+    editor.refresh();
+}
+
+// 放大字体
+function increaseFontSize() {
+    if (!editor) return;
+    currentFontSize = Math.min(28, currentFontSize + 2);
+    applyEditorFontSize();
+    console.log('Font size:', currentFontSize);
+}
+
+// 缩小字体
+function decreaseFontSize() {
+    if (!editor) return;
+    currentFontSize = Math.max(12, currentFontSize - 2);
+    applyEditorFontSize();
+    console.log('Font size:', currentFontSize);
+}
+
+// 更新状态栏
+function updateStatus() {
+    if (!editor) return;
+    var text = editor.getValue();
+    document.getElementById('char-count').textContent = text.length + ' 字符';
+    var cursor = editor.getCursor();
+    document.getElementById('line-info').textContent = '行: ' + (cursor.line + 1) + ', 列: ' + (cursor.ch + 1);
+}
+
+// 切换语言
+function switchLang(lang) {
+    if (!editor) return;
+    var mode = langModes[lang] || 'text/x-csrc';
+    editor.setOption('mode', mode);
+}
+
+// 切换语言
+function reloadtemplate(lang) {
+    if (lang == undefined) return;
+    document.cookie = "lastlang=" + lang;
+    if (lang != _lastlang) {
+        location.reload();
+    }
+}
+</script>
+
+<script>
+// 刷新结果
+function fresh_result(solution_id) {
+    var tb = document.getElementById('result');
+    if (solution_id == undefined) {
+        tb.innerHTML = "Vcode Error!";
+        if ($("#vcode").length) $("#vcode").click();
+        return;
+    }
+    var sid = parseInt(solution_id);
+    if (sid <= 0) {
+        tb.innerHTML = <?php echo json_encode(str_replace("10", isset($OJ_SUBMIT_COOLDOWN_TIME)?$OJ_SUBMIT_COOLDOWN_TIME:'10', isset($MSG_BREAK_TIME)?$MSG_BREAK_TIME:'')); ?>;
+        if ($("#vcode").length) $("#vcode").click();
+        return;
+    }
+    $.get("status-ajax.php?solution_id=" + solution_id, function(r) {
+        var ra = r.split(",");
+        window.myVariable = ra[0];
+        var loader = "<img width=18 src=image/loader.gif>";
+        var tag = (ra[0] < 4) ? "span" : "a";
+        if (ra[0] == 11 || ra[0] > 15)
+            tb.innerHTML = "<" + tag + " href='ceinfo.php?sid=" + solution_id + "' target=_blank>" + judge_result[ra[0]] + "</" + tag + ">";
+        else
+            tb.innerHTML = "<" + tag + " href='reinfo.php?sid=" + solution_id + "' target=_blank>" + judge_result[ra[0]] + " AC:" + ra[4] + "</" + tag + ">";
+        if (ra[0] < 4 || ra[0] > 15) tb.innerHTML += loader;
+        tb.innerHTML += " Memory:" + ra[1] + " Time:" + ra[2];
+        if (ra[0] < 4 || ra[0] > 15)
+            setTimeout(function() { fresh_result(solution_id); }, 2000);
+        else {
+            // AC 音效和图片弹窗 (ra[0] == 4 表示 Accepted)
+            if (ra[0] == 4) {
+                var audio = new Audio('sound/ac.wav');
+                audio.play().catch(function(e) { console.log('音效播放失败:', e); });
+                showAcPopup();
+            }
+            setTimeout(function() { print_result(solution_id); }, 2000);
+            count = 1;
+        }
     });
-  } finally {
-    db.close();
-  }
-};
+}
 
-function runSQL(input,sql){
-//      log('Loading and initializing SQLite3 module...');
-        sqlite3InitModule().then((sqlite3) => {
-//        log('Done initializing. Running demo...');
-          try {
-            $("#out").val("");
-            startSQL(sqlite3,input,sql);
-          } catch (err) {
-            console.log(err.name, err.message);
-          }
+function print_result(solution_id) {
+    $.ajax({
+        url: "status-ajax.php",
+        type: "GET",
+        data: { tr: 1, solution_id: solution_id },
+        success: function(data) { $("#out").val(data); }
+    });
+}
+
+// 提交
+function do_submit() {
+    if (editor) editor.save(); // 同步到 textarea
+    $("#Submit").attr("disabled", "true");
+    var mark = "<?php echo isset($id) ? 'problem_id' : 'cid'; ?>";
+    var problem_id = document.getElementById(mark);
+    problem_id.value = '<?php echo isset($id) ? $id : (isset($cid) ? $cid : ''); ?>';
+    document.getElementById("frmSolution").target = "_self";
+<?php if(isset($_GET['spa'])){ ?>
+    <?php if($solution_name) { ?>document.getElementById("frmSolution").submit();<?php } ?>
+    $.post("submit.php?ajax", $("#frmSolution").serialize(), function(data) { fresh_result(data); });
+    $("#Submit").prop('disabled', true);
+    $("#TestRun").prop('disabled', true);
+    count = <?php echo isset($OJ_SUBMIT_COOLDOWN_TIME) ? $OJ_SUBMIT_COOLDOWN_TIME : 5; ?> * 2;
+    handler_interval = setTimeout(resume, 1000);
+<?php } else { ?>
+    document.getElementById("frmSolution").submit();
+<?php } ?>
+}
+
+// 测试运行
+function do_test_run() {
+    if (editor) editor.save(); // 同步到 textarea
+    if (handler_interval) clearInterval(handler_interval);
+    var tb = document.getElementById('result');
+    var source = editor ? editor.getValue() : $("#source").val();
+    if (source.length < 10) return alert("too short!");
+    if (tb) tb.innerHTML = "<img width=18 src=image/loader.gif>";
+
+    var mark = "<?php echo isset($id) ? 'problem_id' : 'cid'; ?>";
+    var problem_id = document.getElementById(mark);
+    problem_id.value = -problem_id.value;
+    $.post("submit.php?ajax", $("#frmSolution").serialize(), function(data) { fresh_result(data); });
+    $("#Submit").prop('disabled', true);
+    $("#TestRun").prop('disabled', true);
+    problem_id.value = -problem_id.value;
+    count = <?php echo isset($OJ_SUBMIT_COOLDOWN_TIME) ? $OJ_SUBMIT_COOLDOWN_TIME : 5; ?> * 2;
+    handler_interval = setTimeout(resume, 1000);
+}
+
+// 恢复按钮
+function resume() {
+    count--;
+    if (count < 0) {
+        $("#Submit").attr("disabled", false);
+        $("#TestRun").attr("disabled", false);
+        if (handler_interval) clearInterval(handler_interval);
+        if ($("#vcode").length) $("#vcode").click();
+    } else {
+        $("#Submit").val("<?php echo isset($MSG_SUBMIT)?$MSG_SUBMIT:'Submit'; ?>(" + count + ")");
+        $("#TestRun").val("<?php echo isset($MSG_TR)?$MSG_TR:'Test'; ?>(" + count + ")");
+        setTimeout(resume, 1000);
+    }
+}
+
+// 编码提交
+function encoded_submit() {
+    if (editor) editor.save();
+    var mark = "<?php echo isset($id) ? 'problem_id' : 'cid'; ?>";
+    var problem_id = document.getElementById(mark);
+    problem_id.value = '<?php echo isset($id) ? $id : (isset($cid) ? $cid : ''); ?>';
+    document.getElementById("frmSolution").target = "_self";
+    document.getElementById("encoded_submit_mark").name = "encoded_submit";
+    var source = editor ? editor.getValue() : $("#source").val();
+    $("#source").val(encode64(utf16to8(source)));
+    document.getElementById("frmSolution").submit();
+}
+
+// AI 生成
+function ai_gen(filename) {
+    $('#ai_bt').text('AI...').prop('disabled', true);
+    $.ajax({
+        url: '<?php echo isset($OJ_AI_API_URL) ? $OJ_AI_API_URL : ''; ?>',
+        type: 'GET',
+        data: { pid: '<?php echo isset($id) ? $id : ''; ?>', filename: filename },
+        success: function(data) {
+            var code = data.replace(/^```\w*\n?/, '').replace(/\n?```$/, '');
+            if (editor) {
+                editor.setValue(code);
+            } else {
+                $("#source").val(code);
+            }
+            updateStatus();
+            $('#ai_bt').prop('disabled', false).text('AI');
+        },
+        error: function() {
+            $('#ai_bt').text('失败').prop('disabled', false);
+        }
+    });
+}
+
+// 自动保存
+function autoSave() {
+    if (localStorage && editor) {
+        var key = _userKey + "source:" + location.href;
+        localStorage.setItem(key, editor.getValue());
+    }
+}
+
+// 页面初始化
+$(document).ready(function() {
+    // 初始化 lucide 图标
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    var src = document.getElementById('source');
+    if (src && typeof CodeMirror !== 'undefined') {
+        // 初始化 CodeMirror
+        editor = CodeMirror.fromTextArea(src, {
+            lineNumbers: true,
+            theme: 'dracula',
+            mode: langModes[_lastlang] || 'text/x-csrc',
+            matchBrackets: true,
+            autoCloseBrackets: true,
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: true,
+            lineWrapping: false,
+            scrollbarStyle: 'native'
         });
 
-}
+        // 监听变化更新状态栏
+        editor.on('cursorActivity', updateStatus);
+        editor.on('change', updateStatus);
+        updateStatus();
+        applyEditorFontSize();
 
-
-var handler_interval;
-function do_test_run(){
-	if( handler_interval) window.clearInterval( handler_interval);
-	var loader="<img width=18 src=image/loader.gif>";
-	var tb=window.document.getElementById('result');
-        var source=$("#source").val();
-	if(typeof(editor) != "undefined") {
-		source=editor.getValue();
-        	$("#hide_source").val(source);
-	}
-        let lang=$("#language").val();
-        if(lang==18){
-                console.log("Using Wasm SQLite");
-                runSQL($("#input_text").val(),source);
-                return;
-        }
-	if(source.length<10) return alert("too short!");
-	if(tb!=null)tb.innerHTML=loader;
-
-	var mark="<?php echo isset($id)?'problem_id':'cid';?>";
-	var problem_id=document.getElementById(mark);
-	problem_id.value=-problem_id.value;
-	document.getElementById("frmSolution").target="testRun";
-	//$("#hide_source").val(editor.getValue());
-	//document.getElementById("frmSolution").submit();
-	$.post("submit.php?ajax",$("#frmSolution").serialize(),function(data){fresh_result(data);});
-  	$("#Submit").prop('disabled', true);
-  	$("#TestRun").prop('disabled', true);
-	problem_id.value=-problem_id.value;
-	count=<?php echo isset($OJ_SUBMIT_COOLDOWN_TIME)?$OJ_SUBMIT_COOLDOWN_TIME:5  ?> * 2 ;
-	handler_interval= window.setTimeout("resume();",1000);
-}
-function resume(){
-	count--;
-	var s=$("#Submit")[0];
-	var t=$("#TestRun")[0];
-	if(count<0){
-		 $("#Submit").attr("disabled",false);
-		 $("#Submit").val("<?php echo $MSG_SUBMIT?>");
-		if(t!=null) $("#TestRun").attr("disabled",false);
-		if(t!=null) $("#TestRun").val("<?php echo $MSG_TR?>");
-		if( handler_interval) window.clearInterval( handler_interval);
-		if($("#vcode")!=null) $("#vcode").click();
-	}else{
-		 $("#Submit").val("<?php echo $MSG_SUBMIT?>("+count+")");
-		if(t!=null)t.value="<?php echo $MSG_TR?>("+count+")";
-		window.setTimeout("resume();",1000);
-	}
-}
-function switchLang(lang){
-   var langnames=new Array("c_cpp","c_cpp","pascal","java","ruby","sh","python","php","perl","csharp","objectivec","vbscript","scheme","c_cpp","c_cpp","lua","javascript","golang","sql","fortran","matlab","cobol","r","c_cpp","python");
-   editor.getSession().setMode("ace/mode/"+langnames[lang]);
-
-}
-function reloadtemplate(lang){
-   if(lang==undefined){
-        switchLang(1);
-           return;
-   }
-   console.log("reload:<?php echo $lastlang?> -->"+lang);
-   document.cookie="lastlang="+lang;
-   var url=window.location.href;
-   var i=url.indexOf("sid=");
-   switchLang(lang);
-   if(lang!=<?php echo $lastlang?>)
-        document.location.href=url;
-}
-
-function openBlockly(){
-   $("#source").hide();
-   $("#TestRun").hide();
-   $("#language")[0].scrollIntoView();
-   $("#language").val(6).hide();
-   //$("#language_span").hide();
-   $("#EditAreaArroundInfos_source").hide();
-   $('#blockly').html('<iframe name=\'frmBlockly\' width=90% height=580 src=\'blockly/demos/code/index.html\'></iframe>'); 
-  $("#blockly_loader").hide();
-  $("#transrun").show();
-  //$("#Submit").prop('disabled', true);
-  using_blockly=true;
-  
-}
-function translate(){
-  var blockly=$(window.frames['frmBlockly'].document);
-  var tb=blockly.find('td[id=tab_python]');
-  var python=blockly.find('pre[id=content_python]');
-  tb.click();
-  blockly.find('td[id=tab_blocks]').click();
-  if(typeof(editor) != "undefined") editor.setValue(python.text());
-  else $("#source").val(python.text());
-  $("#language").val(6);
- 
-}
-function loadFromBlockly(){
- translate();
- do_test_run();
-  $("#frame_source").hide();
-//  $("#Submit").prop('disabled', false);
-}
-</script>
-<script language="Javascript" type="text/javascript" src="<?php echo $OJ_CDN_URL?>include/base64.js"></script>
-<?php if (!empty($remote_oj)){
-                echo "<iframe src=remote.php height=0px width=0px ></iframe>";
-      }
-?>
-<?php if($OJ_ACE_EDITOR){ ?>
-<script src="<?php echo $OJ_CDN_URL?>ace/ace.js"></script>
-<script src="<?php echo $OJ_CDN_URL?>ace/ext-language_tools.js"></script>
-<script>
-    ace.require("ace/ext/language_tools");
-    var editor = ace.edit("source");
-    editor.setTheme("ace/theme/xcode");
-    switchLang(<?php echo $lastlang ?>);
-    editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: true,  //改为true,打开自动补齐功能，改为false关闭
-        // fontFamily: "Consolas",  // MacOS missing align
-	// theme: "ace/theme/ambiance",   // Black theme
-        fontSize: "18px"
-    });
-    
-editor.getSession().on("change", function() {
-   
-    var markers = editor.getSession().getMarkers(false);
-    for (var id in markers) {
-        if (markers[id].clazz === "ace_error_marker") {
-            editor.getSession().removeMarker(id);
-        }
-    }
-});
-
-
-   reloadtemplate($("#language").val()); 
-   function autoSave(){
-        var mark="<?php echo isset($id)?'problem_id':'cid';?>";
-        var problem_id=$("#"+mark).val();
-	if(!!localStorage){
-		 let key="<?php echo $_SESSION[$OJ_NAME.'_user_id']?>source:"+location.href;
-		if(typeof(editor) != "undefined")
-			$("#hide_source").val(editor.getValue());
-		localStorage.setItem(key,$("#hide_source").val());
-		//console.log("autosaving "+key+"..."+new Date());
-	}
-   }
-   $(document).ready(function(){
-   	$("#source").css("height",window.innerHeight-180);  
-	if($("#vcode")!=undefined) $("#vcode").click();
-	if(!!localStorage){
-		let key="<?php echo $_SESSION[$OJ_NAME.'_user_id']?>source:"+location.href;
-		let saved=localStorage.getItem(key);
-		   if(saved!=null&&saved!=""&&saved.length>editor.getValue().length){
-                        //let load=confirm("发现自动保存的源码，是否加载？（仅有一次机会）");
-                        //if(load){
-                                console.log("loading "+saved.length);
-                                if(typeof(editor) != "undefined")
-                                        editor.setValue(saved);
-                        //}
-                }
-
-	}
-	if(typeof(editor) != "undefined") editor.resize();
-	window.setInterval('autoSave();',5000);
-	$("body").dblclick(function(){
-                 if (event.ctrlKey==1) formatCode();
-        }).attr("title","Ctrl+双击鼠标,自动整理缩进");
-   });
-</script>
-<script>
-    function increaseFontSize(event) {
-        event.preventDefault();
-        var currentSize = parseInt(editor.getFontSize());
-        editor.setFontSize(currentSize + 3);
-    }
-
-    function decreaseFontSize(event) {
-        event.preventDefault();
-        var currentSize = parseInt(editor.getFontSize());
-        editor.setFontSize(currentSize - 3);
-    }
-   function toggleTheme(event) {
-    event.preventDefault();
-    
-    if (editor.getTheme() === "ace/theme/xcode") {
-        editor.setTheme("ace/theme/monokai");
-    } else {
-        editor.setTheme("ace/theme/xcode");
-    }
-}
-
-	var level = 0;
-var LOOP_SIZE = 100;
-function finishTabifier(code) {
-    code = code.replace(/\n\s*\n/g, '\n');  //blank lines
-    code = code.replace(/^[\s\n]*/, ''); //leading space
-    code = code.replace(/[\s\n]*$/, ''); //trailing space
-    level = 0;
-    var session = editor.getSession();
-    session.setValue(code);
-    return code;
-}
-
-function cleanCStyle(code) {
-    var i = 0;
-    code = code.replace(/\)\n[\s]*/g,')\n    '); //single line if while for
-    function cleanAsync() {
-        var iStart = i;
-        for (; i < code.length && i < iStart + LOOP_SIZE; i++) {
-            c = code.charAt(i);
-
-            if (incomment) {
-                if ('//' == incomment && '\n' == c) {
-                    incomment = false;
-                } else if ('/*' == incomment && '*/' == code.substr(i, 2)) {
-                    incomment = false;
-                    c = '*/\n';
-                    i++;
-                }
-                if (!incomment) {
-                    while (code.charAt(++i).match(/\s/)); ; i--;
-                    c += tabs();
-                }
-                out += c;
-            } else if (instring) {
-                if (instring == c && // this string closes at the next matching quote
-                // unless it was escaped, or the escape is escaped
-          ('\\' != code.charAt(i - 1) || '\\' == code.charAt(i - 2))
-        ) {
-                    instring = false;
-                }
-                out += c;
-            } else if (infor && '(' == c) {
-                infor++;
-                out += c;
-            } else if (infor && ')' == c) {
-                infor--;
-                out += c;
-            } else if ('else' == code.substr(i, 4)) {
-                out = out.replace(/\s*$/, '') + ' e';
-            } else if (code.substr(i).match(/^for\s*\(/)) {
-                infor = 1;
-                out += 'for (';
-                while ('(' != code.charAt(++i)); ;
-            } else if ('//' == code.substr(i, 2)) {
-                incomment = '//';
-                out += '//';
-                i++;
-            } else if ('/*' == code.substr(i, 2)) {
-                incomment = '/*';
-                out += '\n' + tabs() + '/*';
-                i++;
-            } else if ('"' == c || "'" == c) {
-                if (instring && c == instring) {
-                    instring = false;
-                } else {
-                    instring = c;
-                }
-                out += c;
-            } else if ('{' == c) {
-                level++;
-                out = out.replace(/\s*$/, '') + ' {\n' + tabs();
-                while (code.charAt(++i).match(/\s/)); ; i--;
-            } else if ('}' == c) {
-                out = out.replace(/\s*$/, '');
-                level--;
-                out += '\n' + tabs() + '}\n' + tabs();
-                while (code.charAt(++i).match(/\s/)); ; i--;
-            } else if (';' == c && !infor) {
-                out += ';\n' + tabs();
-                while (code.charAt(++i).match(/\s/)); ; i--;
-            } else if ('\n' == c) {
-                out += '\n' + tabs();
-            } else {
-                out += c;
+        // 加载保存的代码
+        if (localStorage) {
+            var key = _userKey + "source:" + location.href;
+            var saved = localStorage.getItem(key);
+            if (saved && saved.length > editor.getValue().length) {
+                editor.setValue(saved);
             }
         }
 
-        if (i < code.length) {
-            setTimeout(cleanAsync, 0);
-        } else {
-            level = li;
-            out = out.replace(/[\s\n]*$/, '');
-            finishTabifier(out);
-        }
+        // 自动保存
+        setInterval(autoSave, 5000);
+
+        editor.refresh();
     }
 
-    code = code.replace(/^[\s\n]*/, ''); //leading space
-    code = code.replace(/[\s\n]*$/, ''); //trailing space
-    code = code.replace(/[\n\r]+/g, '\n'); //collapse newlines
-
-    var out = tabs(), li = level, c = '';
-    var infor = false, forcount = 0, instring = false, incomment = false;
-    cleanAsync();
-}
-function tabs() {
-    var s = '';
-    for (var j = 0; j < level; j++) s += '\t';
-    return s;
-}
-// Functions
-function formatCode() {
-  var session = editor.getSession();
-  cleanCStyle(session.getValue());
-}
-
-
-
-</script>
-<?php }?>
-<script>
-function auto_submit(){
-        if(countDown>0){
-                countDown--;
-                $("#countDown").text("<?php echo $MSG_LeftTime?>"+countDown+"<?php echo $MSG_SECONDS?>");
-        }
-
-}
-<?php if(isset($cid)&&$cid>0){
-        $sql="select unix_timestamp(end_time)-unix_timestamp(now()) from contest where contest_id=?";
-        $countStart=pdo_query($sql,$cid);
-        if(!empty($countStart)){
-                $countStart=intval($countStart[0][0])??0;
-                if($countStart<0) $countStart=0;
-                echo "var countDown=".$countStart.";";
-                echo "if(countDown>0) setInterval('auto_submit()',1000);";
-        }
-      }
-?>
-
-function removeCodeBlockMarkers(str) {
-    // 如果字符串为空，直接返回
-    if (!str || typeof str !== 'string') {
-        return str || '';
-    }
-    // 将字符串按行分割
-    const lines = str.split('\n');
-    const resultLines = [];
-    // 遍历每一行
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const trimmedLine = line.trim();
-        // 如果是第一行且包含```Python，跳过不添加到结果中
-        if (i === 0 && (trimmedLine === '```Python' || trimmedLine.startsWith('```'))) {
-            continue; // 跳过首行标记
-        }
-        // 如果是最后一行且是```，跳过不添加到结果中
-        if (i === lines.length - 1 && trimmedLine === '```') {
-            continue; // 跳过末尾标记
-        }
-        // 否则将行添加到结果中
-        resultLines.push(line);
-    }
-    // 重新组合字符串
-    const result = resultLines.join('\n');
-    // 如果移除标记后结果为空，返回空字符串
-    return result;
-}
-	function ai_gen(filename){
-		    let oldval=$('#ai_bt').val();
-		    $('#ai_bt').val('AI思考中...请稍候...');
-		    $('#ai_bt').prop('disabled', true);
-		    $.ajax({
-			url: '<?php echo $OJ_AI_API_URL ?>?sid=<?php echo $id?>', 
-			type: 'GET',
-			success: function(data) {
-			},
-			error: function() {
-			    console.log('获取数据失败');
-			}
-		    });
-		    $.ajax({
-		    	url: '<?php echo $OJ_AI_API_URL?>', 
-				type: 'GET',
-				data: { pid: '<?php echo $id?>', filename: filename },
-				success: function(data) {
-					if(parseInt(data)>0)
-						window.setTimeout('pull_result('+data+')',1000);
-					else{
-						fill_data(data);		
-					}
-				},
-				error: function() {
-				    $('#ai_bt').val('获取数据失败');
-					$('#ai_bt').prop('disabled', false);
-				}
-		    });
-	}
-function fill_data(data){
-	if(typeof(editor) != "undefined")
-		editor.setValue(removeCodeBlockMarkers(data)); // 假设 #file_data 是 div
-	$('#ai_bt').prop('disabled', false);
-	$('#ai_bt').val("再来一次");
-}
-function pull_result(id){
-	console.log(id);
-    $.ajax({
-	url: '../aiapi/ajax.php', 
-	type: 'GET',
-	data: { id: id },
-	success: function(data) {
-		if(data=='waiting'){
-			window.setTimeout('pull_result('+id+')',1000);
-		}else{
-			fill_data(data);
-		    $('#ai_bt').val('再来一次');
-		    $('#ai_bt').prop('disabled', false);
-		}
-	},
-	error: function() {
-	    $('#ai_bt').val('获取数据失败');
-	    $('#ai_bt').prop('disabled', false);
-	}
-    });
-}
-		    
+    // 刷新验证码
+    if ($("#vcode").length) $("#vcode").click();
+});
 </script>
 
-  </body>
+</body>
 </html>
-<?php //include("template/$OJ_TEMPLATE/footer.php");?>

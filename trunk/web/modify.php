@@ -22,6 +22,7 @@ $user_id = $_SESSION[$OJ_NAME . '_' . 'user_id'];
 $email = trim($_POST['email']);
 $school = trim($_POST['school']);
 $nick = trim($_POST['nick']);
+$group_name = trim($_POST['group_name'] ?? '');
 $len = strlen($nick);
 if ($len > 100) {
     $err_str = $err_str . "$MSG_NICK $MSG_TOO_LONG !";
@@ -84,15 +85,17 @@ else $password = pwGen($_POST['npassword']);
 $nick = htmlentities($nick, ENT_QUOTES, "UTF-8");
 $school = (htmlentities($school, ENT_QUOTES, "UTF-8"));
 $email = (htmlentities($email, ENT_QUOTES, "UTF-8"));
+$group_name = htmlentities($group_name, ENT_QUOTES, "UTF-8");
 $sql = "UPDATE `users` SET"
     . "`password`=?,"
     . "`nick`=?,"    //注释此行  +   删除96行的,$nick +  注释97行   ->   禁用昵称修改
     . "`school`=?,"
-    . "`email`=?"
+    . "`email`=?,"
+    . "`group_name`=?"
     . "WHERE `user_id`=?";
 //echo $sql;
 //exit(0);
-pdo_query($sql, $password, $nick, $school, $email, $user_id);
+pdo_query($sql, $password, $nick, $school, $email, $group_name, $user_id);
 if ($nick != "") {
     $sql = "update solution set nick=? where user_id=?";
     pdo_query($sql, $nick, $user_id);

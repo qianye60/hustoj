@@ -19,28 +19,18 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 ?>
 
 <style>
-	:root {
-		--surface: #ffffff;
-		--surface-soft: #f3f6fb;
-		--line: #e6ebf2;
-		--text-strong: #1c2434;
-		--text-soft: #6b768a;
-		--accent: #3b6ef5;
-		--accent-2: #32c0b3;
-	}
-
 	.syzoj-container {
-		padding: 18px 0 30px;
-		background: #ffffff;
+		padding: 20px 0;
+		background: transparent;
 		min-height: calc(100vh - 118px);
 	}
 
 	.syzoj-card {
-		background: var(--surface);
-		border-radius: 14px;
-		box-shadow: 0 12px 24px rgba(18, 28, 45, 0.08);
-		border: 1px solid var(--line);
-		margin-bottom: 18px;
+		background: #fff;
+		border-radius: 8px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+		border: 1px solid #e5e7eb;
+		margin-bottom: 16px;
 		overflow: hidden;
 	}
 
@@ -49,11 +39,11 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 		background: linear-gradient(135deg, #3b6ef5 0%, #1fc0a8 100%);
 		color: #fff;
 		font-weight: 600;
+		font-size: 15px;
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		justify-content: flex-start;
-		letter-spacing: 0.2px;
+		border-bottom: none;
 	}
 
 	.syzoj-card-header:has(.header-action) {
@@ -72,8 +62,9 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 		gap: 6px;
 		font-size: 12px;
 		padding: 4px 10px;
-		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.18);
+		border-radius: 6px;
+		background: rgba(255, 255, 255, 0.2);
+		color: #fff;
 	}
 
 	.syzoj-card-body {
@@ -81,9 +72,9 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 	}
 
 	.syzoj-title {
-		color: var(--text-strong);
-		font-weight: 700;
-		font-size: 18px;
+		color: #1f2937;
+		font-weight: 600;
+		font-size: 16px;
 		margin: 0 0 12px;
 	}
 
@@ -91,14 +82,15 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 22px;
-		height: 22px;
+		width: 20px;
+		height: 20px;
+		color: #fff;
 	}
 
 	.syzoj-icon svg {
 		width: 18px;
 		height: 18px;
-		stroke-width: 1.8;
+		stroke-width: 2;
 	}
 
 	.syzoj-table {
@@ -107,22 +99,39 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 	}
 
 	.syzoj-table th {
-		background: var(--surface-soft);
+		background: transparent;
 		padding: 10px 12px;
-		color: #3e4b61;
+		color: #6b7280;
 		font-weight: 600;
+		font-size: 12px;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
 		text-align: left;
-		border-bottom: 1px solid var(--line);
+		border-bottom: 1px solid #e5e7eb;
 	}
 
 	.syzoj-table td {
-		padding: 10px 12px;
-		border-bottom: 1px solid #eef1f6;
-		color: #2f3a4f;
+		padding: 12px;
+		border-bottom: 1px solid #f3f4f6;
+		color: #374151;
+		font-size: 14px;
+	}
+
+	.syzoj-table tr:last-child td {
+		border-bottom: none;
 	}
 
 	.syzoj-table tr:hover td {
-		background: #f9fbff;
+		background: #f9fafb;
+	}
+
+	.syzoj-table a {
+		color: #3b82f6;
+		text-decoration: none;
+	}
+
+	.syzoj-table a:hover {
+		text-decoration: underline;
 	}
 
 	.syzoj-pagination-wrap {
@@ -136,7 +145,7 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 	.syzoj-pagination {
 		display: flex;
 		justify-content: center;
-		gap: 8px;
+		gap: 6px;
 		flex-wrap: wrap;
 	}
 
@@ -147,15 +156,15 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 		align-items: center;
 		gap: 6px;
 		font-size: 12px;
-		color: #6b768a;
+		color: #6b7280;
 	}
 
 	.syzoj-page-size select {
 		padding: 4px 8px;
-		border-radius: 6px;
-		border: 1px solid #e1e5ee;
+		border-radius: 4px;
+		border: 1px solid #d1d5db;
 		background: #fff;
-		color: #4a5d7a;
+		color: #374151;
 		font-size: 12px;
 		cursor: pointer;
 	}
@@ -166,7 +175,7 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 		align-items: center;
 		justify-content: center;
 		padding: 6px 10px;
-		border-radius: 8px;
+		border-radius: 6px;
 		font-size: 12px;
 		border: 1px solid #e1e5ee;
 		color: #4a5d7a;
@@ -174,15 +183,15 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 	}
 
 	.syzoj-pagination .active {
-		background: var(--accent);
-		border-color: var(--accent);
+		background: #3b82f6;
+		border-color: #3b82f6;
 		color: #fff;
 	}
 
 	.syzoj-pagination .disabled {
-		background: #f5f5f5;
-		border-color: #e1e5ee;
-		color: #c0c4cc;
+		background: #f9fafb;
+		border-color: #e5e7eb;
+		color: #9ca3af;
 		cursor: not-allowed;
 	}
 
@@ -198,23 +207,23 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 	}
 
 	.syzoj-stat {
-		padding: 12px 10px;
-		border-radius: 12px;
-		background: linear-gradient(135deg, #f8f9fd 0%, #f1f6ff 100%);
-		border: 1px solid #e7edf7;
+		padding: 14px 12px;
+		border-radius: 8px;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
 		text-align: center;
 	}
 
 	.syzoj-stat-title {
 		font-size: 12px;
-		color: #6b768a;
+		color: #6b7280;
 		margin-bottom: 4px;
 	}
 
 	.syzoj-stat-value {
-		font-size: 18px;
+		font-size: 20px;
 		font-weight: 600;
-		color: var(--text-strong);
+		color: #1f2937;
 	}
 
 	.syzoj-split {
@@ -287,28 +296,6 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 				</div>
 			</div>
 
-			<?php if(file_exists("image/slide1.jpg")){ ?>
-			<div class="syzoj-card">
-				<div class="syzoj-card-header">
-					<span class="syzoj-icon" data-lucide="image"></span>
-					<?php echo $OJ_NAME ?>
-				</div>
-				<div class="syzoj-card-body">
-					<div class="carousel">
-						<div class="carousel-arrow left" onclick="prevSlide()">&lt;</div>
-						<?php for($i=1;file_exists("image/slide$i.jpg");$i++){ ?>
-						<div class="carousel-slide <?php if($i==1) echo "active";?>" style="background-image: url('image/slide<?php echo $i ?>.jpg')"></div>
-						<?php } ?>
-						<div class="carousel-arrow right" onclick="nextSlide()">&gt;</div>
-						<div class="carousel-dots">
-							<span class="carousel-dot active" data-index="0"></span>
-							<span class="carousel-dot" data-index="1"></span>
-							<span class="carousel-dot" data-index="2"></span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<?php } ?>
 
 			<div class="syzoj-card">
 				<div class="syzoj-card-header">
@@ -463,7 +450,6 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 			$month_id=mysql_query_cache("select solution_id from solution where  in_date<date_add(curdate(),interval -day(curdate())+1 DAY) order by solution_id desc limit 1;");
 			if(!empty($month_id) && isset($month_id[0][0]) ) $month_id=$month_id[0][0];else $month_id=0;
 			$view_month_rank=mysql_query_cache("select user_id,nick,count(distinct(problem_id)) ac from solution where solution_id>$month_id and problem_id>0  $not_in_noip_contests and user_id not in (".$OJ_RANK_HIDDEN.")  and result=4 and first_time=1 group by user_id,nick order by ac desc limit 5");
-			if ( !empty($view_month_rank) ) {
 			?>
 			<div class="syzoj-card">
 				<div class="syzoj-card-header">
@@ -475,23 +461,26 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 						<thead>
 							<tr>
 								<th>用户</th>
-								<th>昵称</th>
+								<th>姓名</th>
 								<th>解题数</th>
 							</tr>
 						</thead>
 						<tbody>
-							<?php foreach ( $view_month_rank as $row ) { ?>
-								<tr>
-									<td><a target="_blank" href="userinfo.php?user=<?php echo htmlentities($row[0], ENT_QUOTES, "UTF-8"); ?>"><?php echo htmlentities($row[0], ENT_QUOTES, "UTF-8"); ?></a></td>
-									<td><?php echo $row[1]; ?></td>
-									<td><?php echo $row[2]; ?></td>
-								</tr>
+							<?php if (!empty($view_month_rank) && is_array($view_month_rank)) { ?>
+								<?php foreach ( $view_month_rank as $row ) { ?>
+									<tr>
+										<td><a target="_blank" href="userinfo.php?user=<?php echo htmlentities($row[0], ENT_QUOTES, "UTF-8"); ?>"><?php echo htmlentities($row[0], ENT_QUOTES, "UTF-8"); ?></a></td>
+										<td><?php echo htmlentities($row[1], ENT_QUOTES, "UTF-8"); ?></td>
+										<td><?php echo $row[2]; ?></td>
+									</tr>
+								<?php } ?>
+							<?php } else { ?>
+								<tr><td colspan="3"><?php echo $empty_text;?></td></tr>
 							<?php } ?>
 						</tbody>
 					</table>
 				</div>
 			</div>
-			<?php } ?>
 
 			<div class="syzoj-card">
 				<div class="syzoj-card-header">
@@ -503,20 +492,20 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 						<thead>
 							<tr>
 								<th style="width: 20%;">排名</th>
-								<th style="width: 40%;">用户</th>
+								<th style="width: 40%;">姓名</th>
 								<th style="width: 20%;">解题</th>
 								<th style="width: 20%;">提交</th>
 							</tr>
 						</thead>
 						<tbody>
-							<?php if (!empty($view_student_rank)) { ?>
+							<?php if (!empty($view_student_rank) && is_array($view_student_rank)) { ?>
 								<?php $rank_index = 1; ?>
 								<?php foreach ($view_student_rank as $row) { ?>
 									<tr>
 										<td><?php echo $rank_index; ?></td>
 										<td>
 											<a href="userinfo.php?user=<?php echo htmlentities($row['user_id'], ENT_QUOTES, "UTF-8"); ?>">
-												<?php echo htmlentities($row['user_id'], ENT_QUOTES, "UTF-8"); ?>
+												<?php echo !empty($row['nick']) ? htmlentities($row['nick'], ENT_QUOTES, "UTF-8") : htmlentities($row['user_id'], ENT_QUOTES, "UTF-8"); ?>
 											</a>
 										</td>
 										<td><?php echo intval($row['solved']); ?></td>
@@ -536,59 +525,6 @@ $empty_text = isset($MSG_EMPTY) ? $MSG_EMPTY : "暂无数据";
 </div>
 
 <?php include("template/$OJ_TEMPLATE/footer.php");?>
-<?php if(file_exists("image/slide1.jpg")){ ?>
-	<script>
-		const slides = document.querySelectorAll('.carousel-slide');
-		const dots = document.querySelectorAll('.carousel-dot');
-		let currentIndex = 0;
-		let autoPlayInterval;
-
-		function showSlide(index) {
-			slides.forEach((slide, i) => {
-				if (i === index) {
-					slide.classList.add('active');
-				} else {
-					slide.classList.remove('active');
-				}
-			});
-			dots.forEach((dot, i) => {
-				if (i === index) {
-					dot.classList.add('active');
-				} else {
-					dot.classList.remove('active');
-				}
-			});
-		}
-
-		function nextSlide() {
-			currentIndex = (currentIndex + 1) % slides.length;
-			showSlide(currentIndex);
-		}
-
-		function prevSlide() {
-			currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-			showSlide(currentIndex);
-		}
-
-		autoPlayInterval = setInterval(nextSlide, 5000);
-
-		dots.forEach(dot => {
-			dot.addEventListener('click', () => {
-				const targetIndex = parseInt(dot.dataset.index);
-				if (targetIndex !== currentIndex) {
-					currentIndex = targetIndex;
-					showSlide(currentIndex);
-					clearInterval(autoPlayInterval);
-					autoPlayInterval = setInterval(nextSlide, 5000);
-				}
-			});
-		});
-
-	const carousel = document.querySelector('.carousel');
-	carousel.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
-	carousel.addEventListener('mouseleave', () => autoPlayInterval = setInterval(nextSlide, 5000));
-	</script>
-<?php } ?>
 <script>
 	if (window.lucide) {
 		window.lucide.createIcons();

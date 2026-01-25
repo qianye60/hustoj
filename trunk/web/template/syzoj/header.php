@@ -15,7 +15,7 @@
             $result = "";
             $sql_news_menu = "select `news_id`,`title` FROM `news` WHERE `menu`=1 AND `title`!='faqs.cn' ORDER BY `importance` ASC,`time` DESC LIMIT 10";
             $sql_news_menu_result = mysql_query_cache( $sql_news_menu );
-            if ( $sql_news_menu_result ) {
+            if ( $sql_news_menu_result && is_array($sql_news_menu_result) ) {
                 foreach ( $sql_news_menu_result as $row ) {
                     $result .= '<a class="item" href="/viewnews.php?id=' . $row['news_id'] . '">' ."<i class='star icon'></i>" . $row['title'] . '</a>';
                 }
@@ -95,93 +95,6 @@
 }
 
 </style>
-        
-<!-- 苹果液体玻璃效果所需SVG滤镜 -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-  <filter id="customLensFilter" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
-    <feComponentTransfer in="SourceAlpha" result="alpha">
-      <feFuncA type="identity" />
-    </feComponentTransfer>
-    <feGaussianBlur in="alpha" stdDeviation="50" result="blur" />
-    <feDisplacementMap in="SourceGraphic" in2="blur" scale="50" xChannelSelector="A" yChannelSelector="A" />
-  </filter>
-</svg>
-
-<!-- 玻璃效果样式 - 整合到.padding类中 -->
-<style>
-:root {
-  --lg-bg-color: rgba(255, 255, 255, 0.55);
-  --lg-highlight: rgba(255, 255, 255, 0.75);
-  /*--lg-text: #ffffff;*/
-  --lg-red: #fb4268;
-  --lg-grey: #444739;
-}
-
-/* 为.padding类添加玻璃效果 */
-.padding {
-  position: relative;
-  border-radius: 3rem;
-  overflow: hidden;
-  box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.1);
-  color: var(--lg-text);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
-  padding: 2rem;
-}
-
-/* 玻璃效果层级 */
-.padding::before,
-.padding::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-}
-
-.padding::before {
-  z-index: 0;
-  backdrop-filter: blur(4px);
-  filter: url(#customLensFilter) saturate(120%) brightness(1.15);
-}
-
-.padding::after {
-  z-index: 1;
-  background: var(--lg-bg-color);
-  box-shadow: inset 1px 1px 0 var(--lg-highlight),
-    inset 0 0 5px var(--lg-highlight);
-}
-
-/* 确保内容在玻璃效果之上 */
-.padding > * {
-  position: relative;
-  z-index: 2;
-}
-
-/* 表格样式适配 */
-.padding .ui.basic.table {
-  background: transparent !important;
-  width: 100%;
-}
-
-.padding .ui.basic.table th,
-.padding .ui.basic.table td {
-  color: var(--lg-grey) !important;
-  border-color: rgba(68, 71, 57, 0.2) !important;
-}
-
-/* 按钮样式 */
-.padding .ui.blue.button {
-  transition: transform 0.2s ease-out;
-}
-
-.padding .ui.blue.button:hover {
-  transform: scale(1.05);
-}
-
-.padding .ui.blue.button:active {
-  transform: scale(0.95);
-}
-</style>
     <script src="<?php echo "$OJ_CDN_URL/include/"?>jquery-latest.js"></script>
 
 <!-- Scripts -->
@@ -196,8 +109,8 @@
         if(!isset($_GET['spa'])){
 ?>
    
-<body id="MainBg-C" style="position: relative; margin-top: 49px; height: calc(100% - 49px); overflow-y: overlay; background: #fff !important;">
-    <div id="page-header" class="ui fixed borderless menu" style="position: fixed; height: 49px; z-index:99999">
+<body id="MainBg-C" style="position: relative; margin-top: 50px; height: calc(100% - 50px); overflow-y: overlay; background: #f3f4f6 !important;">
+    <div id="page-header" class="ui fixed borderless menu" style="position: fixed; height: 50px; z-index:99999">
         <div id="menu" class="ui stackable mobile ui container computer" style="margin-left:auto;margin-right:auto;">
             <a class="header item"  href="welcome.php"><span
                     style="font-family: 'Exo 2'; font-size: 1.5em; font-weight: 600; "><?php echo $domain==$DOMAIN?$OJ_NAME:ucwords($OJ_NAME)."'s OJ"?></span></a>
@@ -231,9 +144,6 @@
             <!-- 排名 -->
             <a class="item <?php if ($url=="ranklist.php") echo "active";?> "
                 href="<?php echo $path_fix?>ranklist.php"><i class="signal icon"></i><span class="desktop-only"><?php echo $MSG_RANKLIST?></span></a>
-            <a class="item" href="https://www.hello-algo.com/chapter_hello_algo/" target="_blank" rel="noopener">
-                <i class="book icon"></i><span class="desktop-only">算法自学</span>
-            </a>
             <!--<a class="item <?php //if ($url=="contest.php") echo "active";?>" href="/discussion/global"><i class="comments icon"></i><span class="desktop-only"><?php echo $MSG_BBS?></span></a>-->
             <!-- 近期比赛 -->    
 <?php if(isset($OJ_RECENT_CONTEST)&&$OJ_RECENT_CONTEST){    ?>
@@ -267,30 +177,22 @@
                             <a id="" class="item active" href="<?php echo $path_fix?>conteststatistics.php?cid=<?php echo $cid?>" ><i class="eye icon"></i><span class="desktop-only"><?php echo $MSG_STATISTICS?></span></a>
                     <?php }  ?>
             <?php }  ?>
-            <?php
-                if($OJ_MENU_DROPDOWN){
-            ?>
+            <!--学习资料下拉菜单 -->
             <div class="ui simple dropdown item">
-                        <i class="book icon"></i><span class='desktop-only'>学习资料</span><i class="dropdown icon"></i>
-                        <div class="menu">
-            <?php  } ?>
-            <?php echo $sql_news_menu_result_html; ?>
-            <?php
-            if($OJ_MENU_DROPDOWN){
-                ?>
-                        </div>
+                <i class="book icon"></i><span class='desktop-only'>学习资料</span><i class="dropdown icon"></i>
+                <div class="menu">
+                    <a class="item" href="https://www.hello-algo.com/chapter_hello_algo/" target="_blank" rel="noopener"><i class="code icon"></i>算法自学</a>
+                    <?php echo $sql_news_menu_result_html; ?>
+                </div>
             </div>
-            <?php } ?>
 
             <div class="right menu">
                 <?php if(isset($_SESSION[$OJ_NAME.'_'.'user_id'])) { ?>
                 <a href="<?php echo $path_fix?>/userinfo.php?user=<?php echo $_SESSION[$OJ_NAME.'_'.'user_id']?>"
                     style="color: inherit; ">
                     <div class="ui simple dropdown item">
-                        <?php echo $_SESSION[$OJ_NAME.'_'.'user_id']; 
+                        <?php echo $_SESSION[$OJ_NAME.'_'.'user_id'];
                               if(!empty($_SESSION[$OJ_NAME.'_nick'])) echo "(".$_SESSION[$OJ_NAME.'_nick'].")";
-                              if(!empty($_SESSION[$OJ_NAME.'_group_name'])) echo "[".$_SESSION[$OJ_NAME.'_group_name']."]";
-                                      
                         ?>
                         <i class="dropdown icon"></i>
                         <div class="menu">

@@ -11,7 +11,7 @@ if (!isset($_SESSION[$OJ_NAME . '_' . 'user_id'])) {
     exit(0);
 }
 
-$sql = "SELECT `school`,`nick`,`email` FROM `users` WHERE `user_id`=?";
+$sql = "SELECT `school`,`nick`,`email`,`group_name` FROM `users` WHERE `user_id`=?";
 $result = pdo_query($sql, $_SESSION[$OJ_NAME . '_' . 'user_id']);
 $row = $result[0];
 

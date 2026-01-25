@@ -321,3 +321,413 @@ code {
     display: none;
   }
 }
+
+/* ========== 界面优化样式 ========== */
+
+/* 全局字体大小优化 */
+body {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* 导航栏优化 */
+#page-header.ui.menu {
+  font-size: 14px;
+}
+
+#page-header .item {
+  padding: 0.8em 1em;
+}
+
+#page-header .header.item span {
+  font-size: 1.3em;
+}
+
+/* 表格优化 */
+.ui.table {
+  font-size: 14px;
+}
+
+.ui.table th {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 10px;
+}
+
+.ui.table td {
+  padding: 10px;
+}
+
+/* 按钮优化 */
+.ui.button {
+  font-size: 14px;
+  padding: 10px 18px;
+}
+
+/* 标题优化 */
+h1 { font-size: 2em; }
+h2 { font-size: 1.6em; }
+h3 { font-size: 1.4em; }
+h4 { font-size: 1.2em; }
+
+/* 卡片内容优化 */
+.padding {
+  font-size: 14px;
+}
+
+/* 题目列表优化 */
+.ui.table a {
+  font-size: 14px;
+}
+
+/* 状态页面优化 */
+.badge {
+  font-size: 13px;
+  padding: 4px 8px;
+}
+
+/* 代码编辑器字体 */
+#source, .ace_editor {
+  font-size: 16px !important;
+}
+
+/* 表单输入框优化 */
+.ui.form input,
+.ui.form textarea,
+.ui.input input {
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+/* 下拉菜单优化 */
+.ui.dropdown .menu .item {
+  font-size: 14px;
+  padding: 10px 14px !important;
+}
+
+/* 分页优化 */
+.ui.pagination.menu .item {
+  font-size: 14px;
+  padding: 8px 14px;
+}
+
+/* 首页卡片优化 */
+.syzoj-card {
+  margin-bottom: 1.5em;
+}
+
+.syzoj-card-header {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 15px;
+}
+
+.syzoj-card-body {
+  padding: 15px;
+}
+
+.syzoj-table {
+  font-size: 14px;
+}
+
+.syzoj-table th,
+.syzoj-table td {
+  padding: 10px 8px;
+}
+
+/* 提交页面优化 */
+#language_span {
+  font-size: 14px;
+}
+
+#language_span select {
+  font-size: 14px;
+  padding: 6px 10px;
+}
+
+/* 链接悬停效果 */
+a:hover {
+  transition: color 0.2s ease;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .ui.table {
+    font-size: 13px;
+  }
+
+  .ui.button {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+}
+
+/* ========== 导航栏下拉菜单优化 ========== */
+
+/* 下拉菜单悬停展开效果 */
+.ui.simple.dropdown:hover > .menu {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.ui.simple.dropdown > .menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid rgba(34,36,38,.15);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 10000;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ui.simple.dropdown > .menu .item {
+  padding: 12px 16px !important;
+  font-size: 14px;
+  color: #333;
+  display: block;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.ui.simple.dropdown > .menu .item:hover {
+  background: #f5f5f5;
+  color: #1890ff;
+}
+
+.ui.simple.dropdown > .menu .item i.icon {
+  margin-right: 8px;
+}
+
+/* ========== 题目列表页面优化 ========== */
+
+.problemset-table {
+  font-size: 14px;
+}
+
+.problemset-table th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+.problemset-table td {
+  vertical-align: middle;
+}
+
+.problemset-table a {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.problemset-table a:hover {
+  color: #40a9ff;
+  text-decoration: underline;
+}
+
+/* ========== 竞赛/作业页面优化 ========== */
+
+.contest-table {
+  font-size: 14px;
+}
+
+.contest-table .contest-title {
+  font-weight: 500;
+  color: #333;
+}
+
+.contest-table .contest-time {
+  color: #666;
+  font-size: 13px;
+}
+
+/* 竞赛状态标签 */
+.contest-status {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.contest-status.running {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.contest-status.ended {
+  background: #f5f5f5;
+  color: #999;
+}
+
+.contest-status.upcoming {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+/* ========== 状态页面优化 ========== */
+
+.status-table {
+  font-size: 14px;
+}
+
+.status-table .result-ac {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.status-table .result-wa {
+  color: #f5222d;
+  font-weight: 600;
+}
+
+.status-table .result-tle {
+  color: #fa8c16;
+  font-weight: 600;
+}
+
+.status-table .result-pending {
+  color: #1890ff;
+}
+
+/* ========== 排名页面优化 ========== */
+
+.ranklist-table {
+  font-size: 14px;
+}
+
+.ranklist-table .rank-num {
+  font-weight: 700;
+  color: #333;
+}
+
+.ranklist-table .rank-1 {
+  color: #faad14;
+}
+
+.ranklist-table .rank-2 {
+  color: #8c8c8c;
+}
+
+.ranklist-table .rank-3 {
+  color: #d48806;
+}
+
+.ranklist-table .user-name {
+  font-weight: 500;
+}
+
+.ranklist-table .solved-count {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+/* ========== 提交代码页面优化 ========== */
+
+.submit-page {
+  padding: 20px;
+}
+
+.submit-page .problem-info {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.submit-page .language-select {
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+}
+
+.submit-page .submit-btn {
+  font-size: 15px;
+  padding: 10px 24px;
+  font-weight: 500;
+}
+
+.submit-page .result-area {
+  margin-top: 15px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 4px;
+}
+
+/* 代码编辑器容器 */
+#source {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+/* ========== 通用UI组件优化 ========== */
+
+/* 标签样式 */
+.ui.label {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+/* 消息提示 */
+.ui.message {
+  font-size: 14px;
+  padding: 14px 18px;
+}
+
+/* 段落间距 */
+.ui.segment {
+  padding: 18px;
+}
+
+/* 面包屑导航 */
+.ui.breadcrumb {
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+/* 搜索框 */
+.ui.search input {
+  font-size: 14px;
+  padding: 10px 14px;
+}
+
+/* 选择框 */
+.ui.selection.dropdown {
+  font-size: 14px;
+  padding: 10px 14px;
+}
+
+/* ========== 页面内容区域优化 ========== */
+
+.ui.main.container {
+  max-width: 1200px;
+  padding: 0 15px;
+}
+
+/* 内容卡片 */
+.content-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* 页面标题 */
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* 分隔线 */
+.ui.divider {
+  margin: 20px 0;
+}

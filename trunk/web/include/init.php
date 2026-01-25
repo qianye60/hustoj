@@ -47,11 +47,12 @@ if (session_status() == PHP_SESSION_NONE) {
     session_set_cookie_params([
               'lifetime' => 0,
                 'path' => '/',
-                  'domain' => $domain ,
+                  'domain' => '' ,  // 空字符串让PHP自动处理，避免localhost问题
                     'secure' => false,      // 本地开发用false
                       'httponly' => true,    // 防止JavaScript访问
-                        'samesite' => 'Strict'
+                        'samesite' => 'Lax'  // 使用Lax而不是Strict，避免跳转问题
     ]);
+    session_start();
 }
 if($OJ_SaaS_ENABLE){
 	$DOMAIN="my.hustoj.com";   //   如启用，需要替换为SaaS服务的主域名。

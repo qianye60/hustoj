@@ -33,6 +33,10 @@
                     <input name="school" placeholder="<?php echo $MSG_SCHOOL?>" type="text" value="<?php echo htmlentities($row['school'],ENT_QUOTES,"UTF-8")?>">
                 </div>
                 <div class="field">
+                    <label for="group_name"><?php echo $MSG_GROUP_NAME?></label>
+                    <input name="group_name" placeholder="班级/分组" type="text" value="<?php echo htmlentities($row['group_name'] ?? '',ENT_QUOTES,"UTF-8")?>">
+                </div>
+                <div class="field">
                     <label for="email"><?php echo $MSG_EMAIL?>*</label>
                     <input name="email" placeholder="<?php echo $MSG_EMAIL?>" type="text" value="<?php echo htmlentities($row['email'],ENT_QUOTES,"UTF-8")?>">
                 </div>
