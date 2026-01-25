@@ -4,7 +4,16 @@ header("X-XSS-Protection: 1; mode=block; sameorigin");
 header("X-Download-Options: noopen");
 header("Referrer-Policy: same-origin");
 //header("X-Permitted-Cross-Domain-Policies: none");
-
+$domain=basename($_SERVER["HTTP_HOST"]??"");
+session_set_cookie_params([
+          'lifetime' => 0,
+            'path' => '/',
+//              'domain' => $domain ,
+//                'secure' => true,      // 仅HTTPS
+                  'httponly' => true,    // 防止JavaScript访问
+                    'samesite' => 'Strict'
+]);
+@session_start();
 require_once(dirname(__FILE__)."/pdo.php");
 require_once(dirname(__FILE__)."/memcache.php");
 
@@ -42,18 +51,8 @@ if (isset($_SESSION[$OJ_NAME . '_' . 'OJ_LANG'])) {
 }
 require(dirname(__FILE__)."/../lang/$OJ_LANG.php");
 
-$domain=basename(isset($_SERVER["HTTP_HOST"]) ? $_SERVER["HTTP_HOST"] : "");
-if (session_status() == PHP_SESSION_NONE) {
-    session_set_cookie_params([
-              'lifetime' => 0,
-                'path' => '/',
-                  'domain' => '' ,  // 空字符串让PHP自动处理，避免localhost问题
-                    'secure' => false,      // 本地开发用false
-                      'httponly' => true,    // 防止JavaScript访问
-                        'samesite' => 'Lax'  // 使用Lax而不是Strict，避免跳转问题
-    ]);
-    session_start();
-}
+
+
 if($OJ_SaaS_ENABLE){
 	$DOMAIN="my.hustoj.com";   //   如启用，需要替换为SaaS服务的主域名。
 	$OJ_SaaS_CONF=realpath(dirname(__FILE__)."/..")."/SaaS/".basename($_SERVER["HTTP_HOST"]).".php";
@@ -74,16 +73,21 @@ if(isset($_SERVER["HTTP_USER_AGENT"])){  // 360 or IE use bs3 instead
         $OJ_TEMPLATE="bs3";
 }
 
-$ip = ($_SERVER['REMOTE_ADDR']??"");
-if( isset($_SERVER['HTTP_X_FORWARDED_FOR'] )&&!empty( trim( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ){
-    $REMOTE_ADDR = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    $tmp_ip=explode(',',$REMOTE_ADDR);
-    $ip =(htmlentities($tmp_ip[0],ENT_QUOTES,"UTF-8"));
-} else if(isset($_SERVER['HTTP_X_REAL_IP'])&& !empty( trim( $_SERVER['HTTP_X_REAL_IP'] ) ) ){
-    $REMOTE_ADDR = $_SERVER['HTTP_X_REAL_IP'];
-    $tmp_ip=explode(',',$REMOTE_ADDR);
-    $ip =(htmlentities($tmp_ip[0],ENT_QUOTES,"UTF-8"));
+$ip = '';
+if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+    $ip = $_SERVER['HTTP_CLIENT_IP'];
+} else if (!empty($_SERVER['REMOTE_ADDR'])) {
+    $ip = $_SERVER['REMOTE_ADDR'];
 }
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty(trim($_SERVER['HTTP_X_FORWARDED_FOR']))) {
+    $forwardedIps = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    $ip = trim($forwardedIps[0]);
+} else if (isset($_SERVER['HTTP_X_REAL_IP']) && !empty(trim($_SERVER['HTTP_X_REAL_IP']))) {
+    $ip = trim($_SERVER['HTTP_X_REAL_IP']);
+}
+// 验证IP格式
+$ip = filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
+
 if(isset($OJ_LIP_URL) && isset($_COOKIE['lip']) ){
 	 $ip=long2ip(intval($_COOKIE['lip']));
 }
