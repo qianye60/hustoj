@@ -9,9 +9,29 @@
 require_once("../include/db_info.inc.php");
 require_once("../include/my_func.inc.php");
 // 设置请求的URL
-$url = 'http://demo.hustoj.com/aiapi/proxy.php';   // 千问是：'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
-$apiKey = "设置为阿里云的API-KEY";   //https://bailian.console.aliyun.com/?tab=model#/api-key  创建新的API KEY
-$models=array("qwen-turbo","qwen3-coder-480b-a35b-instruct","qwen3-max","qwen3-coder-30b-a3b-instruct");
-$temperature=0.8;
+$id=intval($_GET['id']);
 
-require_once(dirname(__FILE__)."/common.php");
+if(isset($_SESSION[$OJ_NAME.'_user_id'])){
+	$user_id=$_SESSION[$OJ_NAME.'_user_id'];
+
+	$sql="select * from openai_task_queue where id=?";
+	$tasks=pdo_query($sql,$id);
+
+	if(!empty($tasks)){
+		$task=$tasks[0];
+		if($user_id==$task['user_id']){
+			if($task['status']==2){
+				$response=$task['response_body'];
+				$data=json_decode($response);
+				if(isset($data->choices[0]->message->content))
+					echo ($data->choices[0]->message->content);	
+				else
+					echo $response;
+			}else{
+				echo "waiting";	
+			}
+		}else{
+			echo "not your ai answer:".$user_id."[".$task['user_id']."]";
+		}
+	}
+}

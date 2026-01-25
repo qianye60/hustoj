@@ -191,11 +191,11 @@ if (!(isset($_SESSION[$OJ_NAME.'_'.'administrator'])
 	    $user_id=$_SESSION[$OJ_NAME.'_user_id'];
 	    $nick=$_SESSION[$OJ_NAME.'_nick'];
             if(file_exists($current_dir."/Gen.py")  || file_exists($current_dir."/Main.c") || file_exists($current_dir."/Main.cc") ){
-	    		$sql = "INSERT INTO solution(problem_id,user_id,nick,in_date,language,ip,code_length,result) VALUES(?,?,?,NOW(),?,?,?,1)";
-	    		$insert_id = pdo_query($sql, -$pid, $user_id, $nick, 6 , $ip, 0 );
-				echo "$pid pending".$insert_id."<img src='../image/loader.gif'>";
-	            echo "<script>window.setTimeout('resolveIDs()',5000);</script>";    
-	           	trigger_judge($insert_id);     // moved to my_func.inc.php
+    		$sql = "INSERT INTO solution(problem_id,user_id,nick,in_date,language,ip,code_length,result) VALUES(?,?,?,NOW(),?,?,?,1)";
+    		$insert_id = pdo_query($sql, -$pid, $user_id, $nick, 6 , $ip, 0 );
+		echo "$pid pending".$insert_id."<img src='../image/loader.gif'>";
+		echo "<script>window.setTimeout('resolveIDs()',5000);</script>";
+           	trigger_judge($insert_id);     // moved to my_func.inc.php
             }else{
                 echo "未找到Main.c或Main.cc,自动生成空文件Gen.py和Main.c。";
                 touch("Gen.py");
@@ -2870,7 +2870,7 @@ function reloadframe($ref,$frame_number,$Plus=""){
     echo "
     <script language=\"Javascript\" type=\"text/javascript\">
     <!--
-        ".$ref.".frame".$frame_number.".location.href='".$path_info["basename"]."?frame=".$frame_number."&current_dir=".$current_dir.$Plus."';
+        ".$ref.".frame".$frame_number.".location.href='".$path_info["basename"]."?frame=".$frame_number."&current_dir=".basename($current_dir).$Plus."';
     //-->
     </script>
     ";
@@ -3213,8 +3213,13 @@ function dir_list_form() {
             	document.location.href='".addslashes($path_info["basename"])."?frame=3&ans2out=1&current_dir=".addslashes($current_dir)."';
             }
         }
+        function confirm_ai() {
+	    if(confirm('当前目录为空，是否生成占位文件以使用AI生成数据？\\n Generate Empty Files for AI  ?')){
+            	document.location.href='".addslashes($path_info["basename"])."?frame=3&generate=1&current_dir=".addslashes($current_dir)."';
+            }
+        }
         function generate() {
-	    if(confirm('将覆盖所有.out文件，请三思而行！\\n Are you sure about overwrite all .out files ?')){
+	    if(confirm('如果目录不为空,将覆盖所有.out文件，请三思而行！\\n Are you sure about overwrite all .out files ?')){
             	document.location.href='".addslashes($path_info["basename"])."?frame=3&generate=1&current_dir=".addslashes($current_dir)."';
             }
         }
@@ -3445,7 +3450,7 @@ function dir_list_form() {
             var w = 1150;
             var h = 768;
             // if(confirm('".uppercase(et('Edit'))." \\' '+arg+' \\' ?'))
-            window.open('".addslashes($path_info["basename"])."?action=7&current_dir=".addslashes($current_dir)."&filename='+escape(arg), '', 'width='+w+',height='+h+',fullscreen=no,scrollbars=no,resizable=yes,status=no,toolbar=no,menubar=no,location=no');
+            window.open('".addslashes($path_info["basename"])."?action=7&current_dir=".basename($current_dir)."&filename='+escape(arg), '', 'width='+w+',height='+h+',fullscreen=no,scrollbars=no,resizable=yes,status=no,toolbar=no,menubar=no,location=no');
         }
         function config(){
             var w = 650;
@@ -3822,10 +3827,10 @@ subtask的题目中也可以有不跟其他数据绑定的，认为是自己一�
         } else {
             $out .= "
             <tr>
-            <td bgcolor=\"#DDDDDD\" width=\"1%\">$uplink<td bgcolor=\"#DDDDDD\" colspan=50><nobr><a href=\"".$path_info["basename"]."?frame=3&current_dir=$current_dir\">$current_dir</a></nobr>
-            <tr><td bgcolor=\"#DDDDDD\" colspan=50>".et('EmptyDir').".</tr>";
+            <td bgcolor=\"#DDDDDD\" width=\"1%\"><td bgcolor=\"#DDDDDD\" colspan=50><nobr><a href=\"".$path_info["basename"]."?frame=3&current_dir=".basename($current_dir)."\">".basename($current_dir)."</a></nobr>
+            <tr><td bgcolor=\"#DDDDDD\" colspan=50>".et('EmptyDir').".</tr><script>window.setTimeout('confirm_ai()',2000)</script>";
         }
-    } else $out .= "<tr><td><font color=red>".et('IOError').".<br>$current_dir</font>";
+    } else $out .= "<tr><td><font color=red>".et('IOError').".<br>".basename($current_dir)."</font>";
     $out .= "</table>";
     echo $out;
 }
@@ -4256,8 +4261,8 @@ function edit_file_form(){
     <tr><th colspan=2>".$filename."</th></tr>
     <tr><td colspan=2><textarea id='file_data' name='file_data' style='width:1000px;height:500px;'>".html_encode($file_data)."</textarea></td></tr>
     <tr><td>";
-	if(str_ends_with($filename,".in") || $filename=="Gen.py" || $filename=="Main.c" || $filename == "Main.cc" ) 
-		echo "<input id='ai_bt' class='btn btn-primary' type=button value='AI一下' onclick='ai_gen(\"".$filename."\")' >";
+	if(str_ends_with($filename,".in") || $filename=="Gen.py" || str_starts_with($filename,"Main.")  ) 
+		echo "<input id='ai_bt' class='btn btn-primary' type=button value='AI一下' onclick='ai_gen(\"".$filename."\")' > *AI生成的代码请人工确认后再执行,如果无法按预期执行请重新生成* ";
      echo "<input type=button value=\"".et('Refresh')."\" class='btn btn-danger' onclick=\"document.edit_form_refresh.submit()\"></td><td align=right><input type=button value=\"".et('SaveFile')."\" onclick=\"go_save()\" class='btn btn-success'></td></tr>
     </form>
     <form name=\"edit_form_refresh\" action=\"".$path_info["basename"]."\" method=\"post\">
@@ -4301,6 +4306,32 @@ function removeCodeBlockMarkers(str) {
     // 如果移除标记后结果为空，返回空字符串
     return result;
 }
+function fill_data(data){
+    $('#file_data').val(removeCodeBlockMarkers(data)); // 假设 #file_data 是 div
+    $('#ai_bt').prop('disabled', false);;
+    $('#ai_bt').val(oldval);
+}
+function pull_result(id){
+	console.log(id);
+    $.ajax({
+	url: '../aiapi/ajax.php', 
+	type: 'GET',
+	data: { id: id },
+	success: function(data) {
+		if(data=='waiting'){
+			window.setTimeout('pull_result('+id+')',2000);
+		}else{
+			fill_data(data);
+		    $('#ai_bt').val('再来一次');
+		    $('#ai_bt').prop('disabled', false);
+		}
+	},
+	error: function() {
+	    $('#ai_bt').val('获取数据失败');
+	    $('#ai_bt').prop('disabled', false);
+	}
+    });
+}
 	function ai_gen(filename){
 		    let oldval=$('#ai_bt').val();
 		    $('#ai_bt').val('AI思考中...请稍候...');
@@ -4310,9 +4341,8 @@ function removeCodeBlockMarkers(str) {
 			type: 'GET',
 			data: { pid: '$pid', filename: filename },
 			success: function(data) {
-			    $('#file_data').val(removeCodeBlockMarkers(data)); // 假设 #file_data 是 div
-		    	    $('#ai_bt').prop('disabled', false);;
-			    $('#ai_bt').val(oldval);
+				if(parseInt(data)>0)
+					window.setTimeout('pull_result('+data+')',2000);
 			},
 			error: function() {
 			    $('#ai_bt').val('获取数据失败');
@@ -4331,7 +4361,9 @@ function removeCodeBlockMarkers(str) {
     }
     echo "
         }
-    //-->
+	";
+if($file_data=="" && ($filename=="Gen.py" || str_starts_with($filename,"Main."))) echo "window.setTimeout('ai_gen(\"".$filename."\")',1000);";
+	echo " //-->
     </script>
     </body>\n</html>";
 }

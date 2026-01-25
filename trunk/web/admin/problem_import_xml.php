@@ -140,6 +140,8 @@ function import_fps($tempfile) {
   $spid = 0;
   
   foreach ($searchNodes as $searchNode) {
+    unset($spjlang);
+    unset($tpjlang); 
     //echo $searchNode->title,"\n";
     //set_time_limit(60);
     $title = $searchNode->title;
@@ -167,14 +169,14 @@ function import_fps($tempfile) {
     $hint = getValue ($searchNode,'hint');
     $source = getValue ($searchNode,'source');				
     $spjcode = getValue ($searchNode,'spj');
-    $remote_oj= getValue ($searchNode,'remote_oj');
-    $remote_id= getValue ($searchNode,'remote_id');
+    $remote_oj= trim((string)getValue ($searchNode,'remote_oj'));
+    $remote_id= trim((string)getValue ($searchNode,'remote_id'));
  
     if($spjcode) $spjlang=getAttribute($searchNode,'spj','language');
     $tpjcode = getValue ($searchNode,'tpj');
     if($tpjcode) $tpjlang=getAttribute($searchNode,'tpj','language');
-    $spj = trim($spjcode.$tpjcode)?1:0;
-    if($spjlang=="Text") $spj=2;
+    $spj = (trim($spjcode)||trim($tpjcode))?1:0;
+    if((isset($spjlang) && $spjlang=="Text")||(isset($tpjlang) && $tpjlang=="Text")) $spj=2;
     if(hasRemoteProblem($remote_oj,$remote_id)){
    	$sql="update problem set title=?,time_limit=?,memory_limit=?,description=?,input=?,output=?,sample_input=?,sample_output=?,hint=?,source=?,spj=? where remote_oj=? and remote_id=?";
         pdo_query($sql,$title, $time_limit, $memory_limit, $description, $input, $output, $sample_input, $sample_output, $hint, $source, $spj,$remote_oj,$remote_id);	
@@ -379,24 +381,22 @@ else {
   $tempfile = $_FILES ["fps"] ["tmp_name"];
   if (get_extension( $_FILES ["fps"] ["name"])=="zip") {
     echo "&nbsp;&nbsp;- zip file, only fps/xml files in root dir are supported";
-    $resource = zip_open($tempfile);
-
-    $i = 1;
-    $tempfile = tempnam("/tmp", "fps");
-    while ($dir_resource = zip_read($resource)) {
-      if (zip_entry_open($resource,$dir_resource)) {
-        $file_name = $path.zip_entry_name($dir_resource);
-        $file_path = substr($file_name,0,strrpos($file_name, "/"));
-        if (!is_dir($file_name)) {
-          $file_size = zip_entry_filesize($dir_resource);
-          $file_content = zip_entry_read($dir_resource,$file_size);
-          file_put_contents($tempfile,$file_content);
-          import_fps($tempfile);
+    $resource = new ZipArchive;
+    if ($resource->open($tempfile) === TRUE) {
+        $tempfile_extract = tempnam("/tmp", "fps");
+        for ($i = 0; $i < $resource->numFiles; $i++) {
+            $file_name = $resource->getNameIndex($i);
+            if (substr($file_name, -1) == '/') continue;
+            
+            $file_content = $resource->getFromIndex($i);
+            file_put_contents($tempfile_extract, $file_content);
+            import_fps($tempfile_extract);
         }
-       zip_entry_close($dir_resource);
-      }
+        $resource->close();
+        if (file_exists($tempfile_extract)) unlink($tempfile_extract);
+    } else {
+        echo "&nbsp;&nbsp;- Error: Failed to open zip file.<br>";
     }
-    zip_close($resource);
     unlink ( $_FILES ["fps"] ["tmp_name"] );
   }
   else {
@@ -414,7 +414,7 @@ else {
 if (isset($OJ_UDP) && $OJ_UDP) {
   $JUDGE_SERVERS = explode(",",$OJ_UDPSERVER);
   $JUDGE_TOTAL = count($JUDGE_SERVERS);
-
+  $insert_id = isset($insert_id) ? $insert_id : 0;
   $select = $insert_id%$JUDGE_TOTAL;
   $JUDGE_HOST = $JUDGE_SERVERS[$select];
 

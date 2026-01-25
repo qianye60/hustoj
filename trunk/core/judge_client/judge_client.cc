@@ -2114,7 +2114,7 @@ void prepare_files(char *filename, int namelen, char *infile, int &p_id,
  	if (access(noip_file_name, R_OK ) != -1){
 		if(DEBUG) printf("NOIP filename:%s\n",noip_file_name);
 		FILE * fpname=fopen(noip_file_name,"r");
-		if(fscanf(fpname,"%s",noip_file_name)){
+		if (fscanf(fpname, "%s", noip_file_name) == 1){
 		    execute_cmd("/bin/cp '%s' %s/%s", infile, work_dir,basename(noip_file_name));   // 如果存在input.name则复制测试数据
 		     execute_cmd("/usr/bin/chown judge %s/%s", work_dir,basename(noip_file_name));   // 修改属主
 		    if(DEBUG) printf("NOIP filename:%s\n",noip_file_name);
@@ -2129,14 +2129,14 @@ void prepare_files(char *filename, int namelen, char *infile, int &p_id,
 
 	sprintf(noip_file_name,"%s/data/%d/output.name",oj_home,p_id);
 	if(DEBUG) printf("NOIP filename:%s\n",noip_file_name);
- 	if (access(noip_file_name, R_OK ) != -1){	
-		FILE * fpname=fopen(noip_file_name,"r");
-		if(fscanf(fpname,"%s",noip_file_name)){
+	FILE * fpname = fopen(noip_file_name, "r");
+	if (fpname != NULL){
+		if (fscanf(fpname, "%s", noip_file_name) == 1){
 		    if(DEBUG) printf("NOIP filename:%s\n",noip_file_name);
 		    if(!strstr("noip_file_name","//")){
                             sprintf(userfile, "%s/run%d/%s", oj_home, runner_id,basename(noip_file_name));
                             execute_cmd("rm %s",userfile);
-                    }
+        }
 		}
 		fclose(fpname);
 	}else{
@@ -3713,7 +3713,7 @@ int make_out(int solution_id,int p_id,int lang,char * work_dir,double time_lmt,i
 		watch_solution(pidApp, infile, ACflg, spj, userfile, outfile,
 					   solution_id, lang, topmemory, mem_lmt, usedtime, time_lmt,
 					   p_id, PEflg, work_dir);
-		execute_cmd("chown www-data:judge %s/*.out", work_dir);
+		execute_cmd("chgrp judge %s/*.out", work_dir);
 	}
 	if(DEBUG) printf("make out files for problem %d \n",p_id);
 	update_solution(solution_id, OJ_TR, usedtime, topmemory >> 10, 0, 0, 0);
@@ -4113,10 +4113,11 @@ int main(int argc, char **argv)
 			}else{
 				if(same_subtask(last_name,dirp->d_name)){ //相同子任务，初次失败
 					if(minus_mark>=0) get_mark-=minus_mark;  //扣除任务内积分
+				}else{
+					if(DEBUG)printf("1 spj_mark: %.2f mark: %.2f get_mark: %.2f\n",spj_mark,mark,get_mark);
+					get_mark+=mark*spj_mark;	
+					pass_rate+=spj_mark;
 				}
-				if(DEBUG)printf("1 spj_mark: %.2f mark: %.2f get_mark: %.2f\n",spj_mark,mark,get_mark);
-				get_mark+=mark*spj_mark;	
-				pass_rate+=spj_mark;
 				if(DEBUG)printf("2 spj_mark: %.2f mark: %.2f get_mark: %.2f\n",spj_mark,mark,get_mark);
 				minus_mark= -1 ;                          //当前任务失败，标记
 			}

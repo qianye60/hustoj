@@ -3,7 +3,10 @@
  * openAI API 兼容模式，代理转发程序
  * 接收HUSTOJ的请求，添加合法API Key，转发给千问官方API或Hugging face等其他提供免费token的平台
  */
+exit(0);
+// 如需使用本功能，请自行完成鉴权操作,或修改文件名为仅自己知道的名称路径，注释前一行的exit(0);
 require_once("../include/db_info.inc.php");
+require_once("../include/my_func.inc.php");
 class QwenProxy
 {
     private $targetUrl = 'https://api.xiaomimimo.com/v1/chat/completions';    // 小米家的mimo 免费用到1.20
@@ -44,7 +47,7 @@ class QwenProxy
                 $this->sendError('无效的JSON请求体: ' . json_last_error_msg());
                 return;
             }
-            $requestData->model = $model ;  // 如果没有给出模型，覆盖默认模型 
+            $requestData->model = $this->model ;  // 覆盖默认模型 
             // 构建转发请求头
             $headers = $this->buildForwardHeaders($contentType);
 	    $requestBody=json_encode($requestData,JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT); 
