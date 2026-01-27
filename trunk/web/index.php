@@ -13,6 +13,11 @@ if (isset($OJ_ON_SITE_CONTEST_ID)) {
     header("location:contest.php?cid=" . $OJ_ON_SITE_CONTEST_ID);
     exit();
 }
+
+// 默认跳转到 welcome 页面
+header("location:welcome.php");
+exit();
+
 ///////////////////////////MAIN	
 
 //NOIP赛制比赛时，本月之星，统计图不计入相关比赛提交
