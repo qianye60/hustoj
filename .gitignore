@@ -2,3 +2,6 @@ trunk/core/sim/*
 trunk/web/discuss3/*
 .DS_Store
 .venv
+
+# 配置文件（包含数据库密码等敏感信息）
+trunk/web/include/db_info.inc.php
