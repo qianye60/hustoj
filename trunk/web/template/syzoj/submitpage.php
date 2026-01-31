@@ -619,22 +619,60 @@ function encoded_submit() {
     document.getElementById("frmSolution").submit();
 }
 
+// 移除代码块标记
+function removeCodeBlockMarkers(code) {
+    return code.replace(/^```\w*\n?/, '').replace(/\n?```$/, '');
+}
+
 // AI 生成
 function ai_gen(filename) {
     $('#ai_bt').text('AI...').prop('disabled', true);
+    $.ajax({
+        url: '<?php echo isset($OJ_AI_API_URL) ? $OJ_AI_API_URL : ''; ?>?sid=<?php echo isset($id) ? $id : ''; ?>',
+        type: 'GET',
+        success: function(data) {},
+        error: function() { console.log('获取数据失败'); }
+    });
     $.ajax({
         url: '<?php echo isset($OJ_AI_API_URL) ? $OJ_AI_API_URL : ''; ?>',
         type: 'GET',
         data: { pid: '<?php echo isset($id) ? $id : ''; ?>', filename: filename },
         success: function(data) {
-            var code = data.replace(/^```\w*\n?/, '').replace(/\n?```$/, '');
-            if (editor) {
-                editor.setValue(code);
+            if (parseInt(data) > 0)
+                window.setTimeout('pull_result(' + data + ')', 1000);
+            else
+                fill_data(data);
+        },
+        error: function() {
+            $('#ai_bt').text('失败').prop('disabled', false);
+        }
+    });
+}
+
+// 填充AI生成的代码
+function fill_data(data) {
+    if (editor)
+        editor.setValue(removeCodeBlockMarkers(data));
+    else
+        $("#source").val(removeCodeBlockMarkers(data));
+    updateStatus();
+    $('#ai_bt').prop('disabled', false).text('再来一次');
+}
+
+// 轮询获取AI结果
+function pull_result(id) {
+    console.log(id);
+    $.ajax({
+        url: 'aiapi/ajax.php',
+        type: 'GET',
+        data: { id: id },
+        success: function(data) {
+            if (data == 'waiting') {
+                window.setTimeout('pull_result(' + id + ')', 1000);
             } else {
-                $("#source").val(code);
+                fill_data(data);
+                $('#ai_bt').text('再来一次').prop('disabled', false);
             }
-            updateStatus();
-            $('#ai_bt').prop('disabled', false).text('AI');
         },
         error: function() {
             $('#ai_bt').text('失败').prop('disabled', false);

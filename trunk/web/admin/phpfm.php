@@ -4337,7 +4337,7 @@ function pull_result(id){
 		    $('#ai_bt').val('AI思考中...请稍候...');
 		    $('#ai_bt').prop('disabled', true);;
 		    $.ajax({
-			url: '../$OJ_AI_API_URL', 
+			url: '../$OJ_AI_API_URL',
 			type: 'GET',
 			data: { pid: '$pid', filename: filename },
 			success: function(data) {
