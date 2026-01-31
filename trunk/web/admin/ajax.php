@@ -3,11 +3,11 @@ ini_set("display_errors", "Off");  //set this to "On" for debugging  ,especially
 require_once("../include/db_info.inc.php");
 if(!(isset($_SESSION[$OJ_NAME.'_administrator'])||isset($_SESSION[$OJ_NAME.'_problem_editor'])||isset($_SESSION[$OJ_NAME.'_contest_creator'])||isset($_SESSION[$OJ_NAME.'_tag_adder']))){
   echo "<a href='../loginpage.php'>Please Login First!</a>";
-  exit(1);  
+  exit(1);
 }
 function try_ajax($tb,$fd,$pr){
 	global $OJ_NAME,$_SESSION,$_POST;
-	$m=$_POST["m"];	
+	$m=$_POST["m"];
 	if($m==$tb."_update_".$fd  && ( isset($_SESSION[$OJ_NAME.'_'.$pr]) )){
                 $data_id=$_POST[$tb.'_id'];
                 $new_value=$_POST[$fd];
@@ -17,18 +17,40 @@ function try_ajax($tb,$fd,$pr){
                 echo pdo_query($sql,$new_value,$data_id);
         }
 }
+function uniqueSource($str) {
+    // 用正则分割字符串，支持多个连续空格
+    $arr = preg_split('/\s+/', trim($str));
+
+    // 去除数组中的重复项
+    $uniqueArr = array_unique($arr);
+
+    // 重新拼接为空格分割的字符串
+    $result = implode(' ', $uniqueArr);
+
+    return $result;
+}
 if($_SERVER['REQUEST_METHOD']=="POST"){
-	$m=$_POST["m"];	
+	$m=$_POST["m"];
+	if($m=="problem_set_source" && ( isset($_SESSION[$OJ_NAME.'_administrator']) || isset($_SESSION[$OJ_NAME.'_problem_editor']) || isset($_SESSION[$OJ_NAME.'_tag_adder']) ) ){
+		$pid=intval($_POST['pid']);
+		$new_source=uniqueSource($_POST['ns']);
+		$sql= "update problem set source=? where problem_id=?";
+		echo pdo_query($sql,$new_source,$pid);
+		//echo $sql." [".$new_source."]";
+	}
 	if($m=="problem_add_source" && ( isset($_SESSION[$OJ_NAME.'_administrator']) || isset($_SESSION[$OJ_NAME.'_problem_editor']) || isset($_SESSION[$OJ_NAME.'_tag_adder']) ) ){
 		$pid=intval($_POST['pid']);
-		$new_source=($_POST['ns']);	
-		$sql= "update problem set source=concat(source,' ',?) where problem_id=?";		
+		$new_source=($_POST['ns']);
+		$old_source=pdo_query("select source from problem where problem_id=?",$pid)[0][0];
+		$new_source=uniqueSource($new_source." ".$old_source);
+		$sql= "update problem set source=? where problem_id=?";
 		echo pdo_query($sql,$new_source,$pid);
+		//echo $sql;
 	}
 	if($m=="problem_update_time" && ( isset($_SESSION[$OJ_NAME.'_administrator']) || isset($_SESSION[$OJ_NAME.'_problem_editor']) ) ){
 		$pid=intval($_POST['pid']);
-		$time=intval($_POST['t']);	
-		$sql= "update problem set time_limit=? where problem_id=?";		
+		$time=intval($_POST['t']);
+		$sql= "update problem set time_limit=? where problem_id=?";
 		echo pdo_query($sql,$time,$pid);
 	}
 	if($m=="problem_get_title"  && ( isset($_SESSION[$OJ_NAME.'_administrator']) || isset($_SESSION[$OJ_NAME.'_problem_editor']) )){
@@ -37,7 +59,7 @@ if($_SERVER['REQUEST_METHOD']=="POST"){
                 $row=mysql_query_cache($sql,$pid)[0];
                 echo $row['title']."&nbsp;&nbsp;<span class='label label-success'>".$row['source']."</span>";
 	}
-	
+
         if($m=="user_update_nick"  && ( isset($_SESSION[$OJ_NAME.'_administrator']) )){
                 $user_id=$_POST['user_id'];
                 $nick=$_POST['nick'];
